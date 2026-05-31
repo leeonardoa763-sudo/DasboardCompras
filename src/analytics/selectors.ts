@@ -106,3 +106,101 @@ export function ultimasOrdenes(compras: Compra[], n = 8): ResumenOrden[] {
     .sort((a, b) => b.fecha.getTime() - a.fecha.getTime())
     .slice(0, n)
 }
+
+// Últimas compras individuales (cada línea del Excel), no agrupadas por OC
+export function ultimasCompras(compras: Compra[], n = 12): Compra[] {
+  return [...compras]
+    .sort((a, b) => b.fecha.getTime() - a.fecha.getTime() || b.ordenCompra - a.ordenCompra)
+    .slice(0, n)
+}
+
+// ── Timeline ──────────────────────────────────────────────────────────────────
+
+export interface PuntoTiempo {
+  label: string
+  importe: number
+  totalConIva: number
+  sortKey: string
+}
+
+export function gastoTimeline(compras: Compra[]): {
+  data: PuntoTiempo[]
+  granularidad: 'semana' | 'mes'
+} {
+  if (compras.length === 0) return { data: [], granularidad: 'mes' }
+
+  const tiempos = compras.map((c) => c.fecha.getTime())
+  const diasRango = (Math.max(...tiempos) - Math.min(...tiempos)) / 86_400_000
+  const porMes = diasRango > 60
+
+  const map = new Map<string, PuntoTiempo>()
+
+  for (const c of compras) {
+    let sortKey: string
+    let label: string
+    if (porMes) {
+      const yr = c.fecha.getFullYear()
+      const mo = c.fecha.getMonth() + 1
+      sortKey = `${yr}-${String(mo).padStart(2, '0')}`
+      label = c.fecha.toLocaleDateString('es-MX', { month: 'short', year: '2-digit' })
+    } else {
+      const yr = c.fecha.getFullYear()
+      sortKey = `${yr}-${String(c.semana).padStart(2, '0')}`
+      label = `Sem ${c.semana}`
+    }
+    const g = map.get(sortKey) ?? { label, importe: 0, totalConIva: 0, sortKey }
+    g.importe += c.importe
+    g.totalConIva += c.totalConIva
+    map.set(sortKey, g)
+  }
+
+  return {
+    data: [...map.values()].sort((a, b) => a.sortKey.localeCompare(b.sortKey)),
+    granularidad: porMes ? 'mes' : 'semana',
+  }
+}
+
+// ── Ranking de tipos de insumo ────────────────────────────────────────────────
+
+export interface RankingTipo {
+  tipo: string
+  importe: number
+  pctTotal: number
+  nOrdenes: number
+  insumoTop: string   // descripción del insumo con mayor gasto dentro del tipo
+}
+
+export function rankingTipos(compras: Compra[]): RankingTipo[] {
+  const total = gastoTotal(compras, false)
+
+  const tipoMap = new Map<
+    string,
+    { importe: number; ordenes: Set<number>; insumos: Map<string, number> }
+  >()
+
+  for (const c of compras) {
+    const t = tipoMap.get(c.tipoInsumo) ?? {
+      importe: 0,
+      ordenes: new Set<number>(),
+      insumos: new Map<string, number>(),
+    }
+    t.importe += c.importe
+    t.ordenes.add(c.ordenCompra)
+    t.insumos.set(c.descripcion, (t.insumos.get(c.descripcion) ?? 0) + c.importe)
+    tipoMap.set(c.tipoInsumo, t)
+  }
+
+  return [...tipoMap.entries()]
+    .map(([tipo, data]) => {
+      const insumoTop =
+        [...data.insumos.entries()].sort(([, a], [, b]) => b - a)[0]?.[0] ?? '—'
+      return {
+        tipo,
+        importe: data.importe,
+        pctTotal: total > 0 ? data.importe / total : 0,
+        nOrdenes: data.ordenes.size,
+        insumoTop,
+      }
+    })
+    .sort((a, b) => b.importe - a.importe)
+}
