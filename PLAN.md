@@ -88,20 +88,22 @@
 
 ---
 
-## Fase 5 — Análisis de precios en el tiempo ⬅ SIGUIENTE
+## Fase 5 — Análisis de precios en el tiempo ✅ COMPLETADA
 **Objetivo:** la pestaña que pediste de precios contra el tiempo.
 
-- [ ] Serie de **precio unitario (Pu)** por insumo a lo largo de las fechas
-      (agrupar por `insumoClave`).
-- [ ] **Regresión lineal** (mínimos cuadrados) por insumo: pendiente ($/día), proyección
-      y r² (ver fórmulas en `ARQUITECTURA.md`).
-- [ ] Índice de precios **base 100** (primer periodo) por insumo.
-- [ ] **Volatilidad**: desviación estándar del Pu por insumo.
-- [ ] Tabla: por insumo → Pu mín / máx / promedio / tendencia (↑↓→) / volatilidad.
-- [ ] Selector para enfocar un insumo y ver su curva.
+- [x] `analytics/precios.ts`: seriePrecios, calcularRegresion, calcularIndiceBase100,
+      resumenPreciosTodos (puro, sin React).
+- [x] Serie de **precio unitario (Pu)** por insumo agrupado por `insumoClave`.
+- [x] **Regresión lineal** (mínimos cuadrados, simple-statistics): pendiente ($/día),
+      proyección +30d, r².
+- [x] **Índice base 100** (primer precio = 100) con toggle en la gráfica.
+- [x] **Volatilidad**: stdDev absoluta + coeficiente de variación (%) por insumo.
+- [x] Tabla ordenable: Pu mín / máx / prom / volatilidad / tendencia (↑↓→) / gasto.
+- [x] Clic en fila abre panel de detalle: KPI mini + gráfica + historial de compras.
+- [x] Estado "datos insuficientes" para insumos con 1 compra o fecha única.
 
-**Aceptación:** para insumos con varias compras se dibuja la curva y la recta de
-tendencia; para insumos con una sola compra se marca "datos insuficientes".
+**Aceptación:** ✅ typecheck y lint limpios; curva y tendencia para insumos con varias
+compras; mensaje claro para insumos con datos insuficientes.
 
 ---
 
