@@ -18,6 +18,48 @@ function fmtYAxis(v: number): string {
   return `$${v}`
 }
 
+// ── Ayuda contextual ──────────────────────────────────────────────────────────
+
+function InfoTooltip({ text }: { text: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <span className="relative inline-flex items-center ml-1.5 flex-shrink-0">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-[15px] h-[15px] rounded-full bg-[#1e2d45] border border-[#2a3f58] text-[#4d6480] hover:text-white hover:bg-blue-600/60 hover:border-blue-500/50 text-[8px] font-700 flex items-center justify-center transition-all focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+        aria-label="Más información"
+      >
+        ?
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-5 z-50 w-64 bg-[#1a2438] border border-[#2a3f58] rounded-xl p-3 shadow-2xl">
+            <p className="text-[11px] text-[#8fa3be] leading-relaxed">{text}</p>
+            <button
+              onClick={() => setOpen(false)}
+              className="mt-2 text-[9px] text-blue-400 hover:text-blue-300 font-500"
+            >
+              Cerrar
+            </button>
+          </div>
+        </>
+      )}
+    </span>
+  )
+}
+
+function SectionLabel({ children, info }: { children: React.ReactNode; info?: string }) {
+  return (
+    <h2 className="text-[10px] font-600 uppercase tracking-widest text-[#4d6480] mb-3 flex items-center">
+      {children}
+      {info && <InfoTooltip text={info} />}
+    </h2>
+  )
+}
+
+// ── Tooltips de Recharts ──────────────────────────────────────────────────────
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function TooltipGasto({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
@@ -27,7 +69,7 @@ function TooltipGasto({ active, payload, label }: any) {
       {label && <p className="text-[10px] text-[#4d6480] mb-1">{label}</p>}
       <p className="text-[13px] font-600 text-blue-400">{fmt$(d.importe)}</p>
       {d.mediaMovil !== null && (
-        <p className="text-[11px] text-amber-400 mt-0.5">MM: {fmt$(d.mediaMovil)}</p>
+        <p className="text-[11px] text-amber-400 mt-0.5">Media móvil: {fmt$(d.mediaMovil)}</p>
       )}
     </div>
   )
@@ -59,13 +101,7 @@ function TooltipAcumulado({ active, payload, label }: any) {
   )
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="text-[10px] font-600 uppercase tracking-widest text-[#4d6480] mb-3">
-      {children}
-    </h2>
-  )
-}
+// ── UI helpers ────────────────────────────────────────────────────────────────
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
@@ -88,6 +124,25 @@ function EmptyState() {
   )
 }
 
+// ── Textos de ayuda ───────────────────────────────────────────────────────────
+
+const HELP = {
+  kpis:
+    'Compara el último periodo con el anterior. "Variación" muestra la diferencia en pesos y en porcentaje: dorado (↑) el gasto subió, verde (↓) bajó. "Acumulado" es la suma de todos los periodos en el rango activo.',
+  areaMA:
+    'La línea azul es el gasto total de cada periodo. La línea punteada dorada es la media móvil de 3 periodos: promedio del punto actual y los dos anteriores. Suaviza los picos y revela la tendencia real del gasto.',
+  deltaBar:
+    'Muestra cuánto cambió el gasto respecto al periodo anterior, en porcentaje. Barras doradas: el gasto subió. Barras azules: el gasto bajó. La línea central (0%) es el punto de referencia.',
+  acumulado:
+    'Suma corriente del gasto desde el primer periodo hasta cada punto. Sirve para ver el ritmo de consumo a lo largo del tiempo y cuánto se ha gastado en total hasta la fecha.',
+  tabla:
+    'Δ: diferencia en pesos vs el periodo anterior (—en el primero). Δ%: la misma diferencia expresada en porcentaje. Media móvil: promedio de los últimos 3 periodos; disponible a partir del 3er periodo.',
+  mediaMovilLeyenda:
+    'La media móvil de 3 periodos suaviza las variaciones puntuales para revelar la tendencia real. Se calcula como el promedio del periodo actual y los dos anteriores.',
+}
+
+// ── Vista principal ───────────────────────────────────────────────────────────
+
 export default function TendenciasView({ compras }: Props) {
   const [granularidad, setGranularidad] = useState<'mes' | 'semana'>('mes')
 
@@ -108,7 +163,7 @@ export default function TendenciasView({ compras }: Props) {
     <div className="space-y-5">
 
       {/* ── Selector de granularidad ── */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {(['mes', 'semana'] as const).map((g) => (
           <button
             key={g}
@@ -122,33 +177,41 @@ export default function TendenciasView({ compras }: Props) {
             {g === 'mes' ? 'Por mes' : 'Por semana'}
           </button>
         ))}
-        <span className="text-[11px] text-[#4d6480] ml-1">
+        <span className="text-[11px] text-[#4d6480]">
           {serie.length} {labelPeriodos}
         </span>
       </div>
 
       {/* ── KPIs comparativos ── */}
       {comp ? (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <KpiCard label={`Gasto ${comp.labelActual}`} value={fmt$(comp.importeActual)} accent="blue" />
-          <KpiCard
-            label={`Gasto ${comp.labelAnterior}`}
-            value={fmt$(comp.importeAnterior)}
-            sublabel="Periodo anterior"
-            accent="blue"
-          />
-          <KpiCard
-            label="Variación"
-            value={(comp.delta >= 0 ? '+' : '') + fmt$(comp.delta)}
-            sublabel={(comp.delta >= 0 ? '↑ ' : '↓ ') + fmtPct(Math.abs(comp.deltaPct))}
-            accent={comp.delta > 0 ? 'amber' : 'green'}
-          />
-          <KpiCard
-            label="Gasto acumulado"
-            value={fmt$(last?.acumulado ?? 0)}
-            sublabel={`en ${serie.length} ${labelPeriodos}`}
-            accent="purple"
-          />
+        <div className="space-y-2">
+          <div className="flex items-center">
+            <span className="text-[10px] font-600 uppercase tracking-widest text-[#4d6480]">
+              Comparativa de periodos
+            </span>
+            <InfoTooltip text={HELP.kpis} />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <KpiCard label={`Gasto ${comp.labelActual}`} value={fmt$(comp.importeActual)} accent="blue" />
+            <KpiCard
+              label={`Gasto ${comp.labelAnterior}`}
+              value={fmt$(comp.importeAnterior)}
+              sublabel="Periodo anterior"
+              accent="blue"
+            />
+            <KpiCard
+              label="Variación"
+              value={(comp.delta >= 0 ? '+' : '') + fmt$(comp.delta)}
+              sublabel={(comp.delta >= 0 ? '↑ ' : '↓ ') + fmtPct(Math.abs(comp.deltaPct)) + ' vs anterior'}
+              accent={comp.delta > 0 ? 'amber' : 'green'}
+            />
+            <KpiCard
+              label="Gasto acumulado"
+              value={fmt$(last?.acumulado ?? 0)}
+              sublabel={`en ${serie.length} ${labelPeriodos}`}
+              accent="purple"
+            />
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -160,7 +223,7 @@ export default function TendenciasView({ compras }: Props) {
       {/* ── Área + media móvil ── */}
       {serie.length > 1 && (
         <Card>
-          <SectionLabel>
+          <SectionLabel info={HELP.areaMA}>
             Gasto por {labelPeriodo} + media móvil 3 periodos (sin IVA)
           </SectionLabel>
           <ResponsiveContainer width="100%" height={220}>
@@ -208,7 +271,7 @@ export default function TendenciasView({ compras }: Props) {
               />
             </ComposedChart>
           </ResponsiveContainer>
-          <div className="flex items-center gap-5 mt-2">
+          <div className="flex items-center gap-5 mt-2 flex-wrap">
             <div className="flex items-center gap-1.5">
               <div className="w-4 h-0.5 bg-blue-500 rounded" />
               <span className="text-[10px] text-[#4d6480]">Gasto del periodo</span>
@@ -218,6 +281,7 @@ export default function TendenciasView({ compras }: Props) {
                 <line x1="0" y1="2" x2="16" y2="2" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="5 3" />
               </svg>
               <span className="text-[10px] text-[#4d6480]">Media móvil (3 periodos)</span>
+              <InfoTooltip text={HELP.mediaMovilLeyenda} />
             </div>
           </div>
         </Card>
@@ -226,7 +290,9 @@ export default function TendenciasView({ compras }: Props) {
       {/* ── Variación % periodo a periodo ── */}
       {serie.length > 1 && (
         <Card>
-          <SectionLabel>Variación vs periodo anterior (%)</SectionLabel>
+          <SectionLabel info={HELP.deltaBar}>
+            Variación vs periodo anterior (%)
+          </SectionLabel>
           <ResponsiveContainer width="100%" height={160}>
             <BarChart
               data={serie.slice(1)}
@@ -258,14 +324,14 @@ export default function TendenciasView({ compras }: Props) {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-          <p className="text-[10px] text-[#4d6480] mt-1.5 flex items-center gap-4">
+          <p className="text-[10px] text-[#4d6480] mt-1.5 flex items-center gap-4 flex-wrap">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-sm inline-block bg-amber-500/80" />
-              Gasto subió
+              Gasto subió vs periodo anterior
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-sm inline-block bg-blue-500/80" />
-              Gasto bajó
+              Gasto bajó vs periodo anterior
             </span>
           </p>
         </Card>
@@ -274,7 +340,9 @@ export default function TendenciasView({ compras }: Props) {
       {/* ── Acumulado corriente ── */}
       {serie.length > 1 && (
         <Card>
-          <SectionLabel>Gasto acumulado en el periodo (sin IVA)</SectionLabel>
+          <SectionLabel info={HELP.acumulado}>
+            Gasto acumulado en el periodo (sin IVA)
+          </SectionLabel>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={serie} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
               <defs>
@@ -316,7 +384,9 @@ export default function TendenciasView({ compras }: Props) {
 
       {/* ── Tabla detallada ── */}
       <Card>
-        <SectionLabel>Detalle por {labelPeriodo}</SectionLabel>
+        <SectionLabel info={HELP.tabla}>
+          Detalle por {labelPeriodo}
+        </SectionLabel>
         <div className="overflow-x-auto">
           <table className="w-full text-[12px] border-collapse">
             <thead>
