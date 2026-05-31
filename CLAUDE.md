@@ -5,7 +5,7 @@
 > está en `PLAN.md` (en raíz) y el detalle técnico en `ARQUITECTURA.md`.
 
 **Repositorio GitHub:** https://github.com/leeonardoa763-sudo/DasboardCompras  
-**Estado actual (2026-05-30):** Fase 0 ✅ y Fase 1 ✅ completas. Siguiente: Fase 2 (layout).
+**Estado actual (2026-05-31):** Fases 0 ✅, 1 ✅ y 2 ✅ completas. Siguiente: Fase 3 (Resumen Ejecutivo — KPIs).
 
 ---
 
@@ -134,9 +134,11 @@ dashboard-compras/
 │   │   ├── trends.ts          # regresión, medias móviles, deltas
 │   │   └── reports.ts         # armado de reporte semanal/mensual
 │   ├── components/            # UI tonta (recibe props ya calculadas)
-│   │   ├── kpi/  charts/  tables/  layout/
+│   │   ├── layout/            # Sidebar, Header, FilterBar, Layout, types
+│   │   ├── kpi/  charts/  tables/   # (Fases 3+)
 │   ├── views/                 # Resumen, Tendencias, Precios, Proveedores…
-│   ├── theme/                 # tokens de color, tipografía
+│   │   └── PlaceholderView.tsx  # Componente compartido de placeholder
+│   ├── theme/                 # tokens de color, tipografía (tokens.ts)
 │   └── App.tsx
 └── ...
 ```
