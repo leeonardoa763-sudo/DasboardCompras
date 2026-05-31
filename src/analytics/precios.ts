@@ -7,6 +7,8 @@ export interface PuntoPrecio {
   fechaLabel: string
   precioUnitario: number
   cantidad: number
+  importe: number
+  empresa: string
   proveedor: string
   ordenCompra: number
 }
@@ -33,6 +35,7 @@ export interface ResumenInsumo {
   r2: number
   ultimaFecha: Date
   gastoTotal: number
+  cantidadTotal: number
 }
 
 /** Devuelve los puntos de precio ordenados por fecha para un insumoClave dado. */
@@ -54,6 +57,8 @@ export function seriePrecios(compras: Compra[], insumoClave: string): PuntoPreci
     }),
     precioUnitario: c.precioUnitario,
     cantidad: c.cantidad,
+    importe: c.importe,
+    empresa: c.empresa,
     proveedor: c.proveedor,
     ordenCompra: c.ordenCompra,
   }))
@@ -129,6 +134,7 @@ export function resumenPreciosTodos(compras: Compra[]): ResumenInsumo[] {
         rows[0].fecha
       )
       const gastoTotal = rows.reduce((s, c) => s + c.importe, 0)
+      const cantidadTotal = rows.reduce((s, c) => s + c.cantidad, 0)
 
       return {
         insumoClave,
@@ -145,6 +151,7 @@ export function resumenPreciosTodos(compras: Compra[]): ResumenInsumo[] {
         r2,
         ultimaFecha,
         gastoTotal,
+        cantidadTotal,
       }
     })
     .sort((a, b) => b.gastoTotal - a.gastoTotal)

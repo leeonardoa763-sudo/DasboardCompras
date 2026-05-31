@@ -17,6 +17,7 @@ function filtrarCompras(compras: Compra[], f: FiltrosActivos): Compra[] {
     if (f.empresas.length > 0 && !f.empresas.includes(c.empresa)) return false
     if (f.compradores.length > 0 && !f.compradores.includes(c.comprador)) return false
     if (f.centros.length > 0 && !f.centros.includes(c.centroCostos)) return false
+    if (f.tiposInsumo.length > 0 && !f.tiposInsumo.includes(c.tipoInsumo)) return false
     if (f.fechaDesde) {
       if (c.fecha < new Date(f.fechaDesde)) return false
     }
