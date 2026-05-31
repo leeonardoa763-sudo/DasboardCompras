@@ -39,38 +39,43 @@
 
 ---
 
-## Fase 2 — Layout, navegación y tema ⬅ SIGUIENTE
+## Fase 2 — Layout, navegación y tema ✅ COMPLETADA
 **Objetivo:** el "esqueleto" visual profesional.
 
-- [x] `src/theme/tokens.ts`: archivo creado (tokens pendientes de diseñar).
-- [ ] Diseñar paleta de color industrial/ejecutiva en `tokens.ts`.
-- [ ] Layout con barra lateral o superior: **Resumen · Tendencias · Precios ·
-      Proveedores · Compradores · Reportes**.
-- [ ] Filtros globales: empresa, centro de costo, rango de fechas, comprador.
-- [ ] Encabezado con logo/título y fecha de última actualización del dataset.
-- [ ] Diseño responsive (escritorio + celular).
+- [x] `src/theme/tokens.ts`: paleta oscura industrial/ejecutiva (amber, blue, muted).
+- [x] Layout con barra lateral: **Resumen · Tendencias · Precios · Proveedores · Compradores · Reportes**.
+- [x] Filtros globales: empresa, centro de costo, rango de fechas, comprador.
+- [x] Encabezado con logo/título y fecha de última actualización del dataset.
+- [x] Diseño responsive (escritorio + celular).
 
-**Aceptación:** navegación entre secciones funciona; filtros existen (aunque aún no
-afecten datos); se ve bien en celular.
+**Aceptación:** ✅ navegación entre secciones funciona; filtros afectan todos los datos; se ve bien en celular.
 
 ---
 
-## Fase 3 — Resumen ejecutivo (KPIs)
+## Fase 3 — Resumen ejecutivo (KPIs) ✅ COMPLETADA
 **Objetivo:** la pantalla que impresiona en los primeros 5 segundos.
 
-- [ ] `analytics/selectors.ts`: agregados base (totales, conteos, agrupaciones).
-- [ ] Tarjetas KPI: Gasto total (con y sin IVA), Ahorro total, % ahorro, # OCs,
-      # proveedores, ticket promedio.
-- [ ] Gráfica: gasto por **tipo de insumo** (dona) y por **empresa** (barras).
-- [ ] Gráfica: gasto por **centro de costo** (barras horizontales, top N).
-- [ ] Tabla compacta: últimas órdenes.
+- [x] `analytics/selectors.ts`: gastoTotal, ahorroTotal, porcentajeAhorro,
+      totalOrdenesUnicas, totalProveedoresUnicos, ticketPromedio,
+      gastoPerTipoInsumo, gastoPerEmpresa, gastoPerCentro, ultimasOrdenes,
+      ultimasCompras, gastoTimeline (adaptativo semana/mes), rankingTipos.
+- [x] `utils/format.ts`: fmt$, fmtPct, fmtNum, fmtFecha (locale es-MX).
+- [x] `components/kpi/KpiCard.tsx`: tarjeta reutilizable con 4 variantes de color.
+- [x] Tarjetas KPI: Gasto sin IVA, Gasto +IVA, Ahorro total, % ahorro, # OCs,
+      # proveedores, ticket promedio. Grid responsive 2→7 columnas.
+- [x] Gráfica: gasto por **tipo de insumo** (dona con leyenda) y por **empresa** (barras horizontales).
+- [x] Gráfica: gasto por **centro de costo** (barras horizontales degradadas, top 8).
+- [x] Gráfica: **línea de tiempo** AreaChart con gradiente (semana si ≤60 días, mes si no).
+- [x] Tabla: **ranking por tipo de insumo** con barra de progreso, % y top insumo del tipo.
+- [x] Tabla: **últimas compras** (líneas individuales) con ID insumo, descripción, tipo, proveedor.
+- [x] Filtros globales (empresa, comprador, centro, fechas) recalculan todo vía `useMemo`.
+- [x] `App.tsx`: filtros elevados al root, `filtrarCompras()` pura, reset al cambiar archivo.
 
-**Aceptación:** KPIs cuadran con cálculos manuales sobre el `ejemplo.xlsx`; los filtros
-de la Fase 2 ya recalculan todo.
+**Aceptación:** ✅ KPIs cuadran; filtros recalculan todas las vistas; typecheck y lint limpios.
 
 ---
 
-## Fase 4 — Análisis de tendencias (semanal y mensual)
+## Fase 4 — Análisis de tendencias (semanal y mensual) ⬅ SIGUIENTE
 **Objetivo:** el "cómo vamos en el tiempo".
 
 - [ ] `analytics/trends.ts`: serie de gasto por **semana** y por **mes**.
