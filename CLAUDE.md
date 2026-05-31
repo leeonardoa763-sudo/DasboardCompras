@@ -5,7 +5,7 @@
 > está en `PLAN.md` (en raíz) y el detalle técnico en `ARQUITECTURA.md`.
 
 **Repositorio GitHub:** https://github.com/leeonardoa763-sudo/DasboardCompras  
-**Estado actual (2026-05-30):** Fases 0 ✅, 1 ✅, 2 ✅ y 3 ✅ completas. Siguiente: Fase 4 (Análisis de Tendencias).
+**Estado actual (2026-05-30):** Fases 0 ✅, 1 ✅, 2 ✅, 3 ✅ y 4 ✅ completas. Siguiente: Fase 5 (Análisis de Precios).
 
 ---
 
