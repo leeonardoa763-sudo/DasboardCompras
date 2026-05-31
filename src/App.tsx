@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { cargarEjemplo, cargarDesdeArchivo } from './data/loadExcel'
-import { gastoTotal, ahorroTotal } from './analytics/selectors'
 import type { ParseResult } from './data/schema'
-import type { ViewId } from './components/layout/types'
+import type { Compra } from './data/schema'
+import type { ViewId, FiltrosActivos } from './components/layout/types'
+import { FILTROS_VACÍOS } from './components/layout/types'
 import Layout from './components/layout/Layout'
 import ResumenView from './views/ResumenView'
 import TendenciasView from './views/TendenciasView'
@@ -11,9 +12,22 @@ import ProveedoresView from './views/ProveedoresView'
 import CompradoresView from './views/CompradoresView'
 import ReportesView from './views/ReportesView'
 
-// gastoTotal y ahorroTotal se mantienen importados; se usarán en Fase 3
-void gastoTotal
-void ahorroTotal
+function filtrarCompras(compras: Compra[], f: FiltrosActivos): Compra[] {
+  return compras.filter((c) => {
+    if (f.empresas.length > 0 && !f.empresas.includes(c.empresa)) return false
+    if (f.compradores.length > 0 && !f.compradores.includes(c.comprador)) return false
+    if (f.centros.length > 0 && !f.centros.includes(c.centroCostos)) return false
+    if (f.fechaDesde) {
+      if (c.fecha < new Date(f.fechaDesde)) return false
+    }
+    if (f.fechaHasta) {
+      const hasta = new Date(f.fechaHasta)
+      hasta.setHours(23, 59, 59, 999)
+      if (c.fecha > hasta) return false
+    }
+    return true
+  })
+}
 
 export default function App() {
   const [result, setResult] = useState<ParseResult | null>(null)
@@ -21,6 +35,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [activeView, setActiveView] = useState<ViewId>('resumen')
   const [ultimaActualizacion, setUltimaActualizacion] = useState<Date | null>(null)
+  const [filtros, setFiltros] = useState<FiltrosActivos>(FILTROS_VACÍOS)
 
   useEffect(() => {
     cargarEjemplo()
@@ -39,33 +54,40 @@ export default function App() {
       .then((r) => {
         setResult(r)
         setUltimaActualizacion(new Date())
+        setFiltros(FILTROS_VACÍOS)
       })
       .catch((e: unknown) => setError(String(e)))
       .finally(() => setCargando(false))
   }
 
-  const compras = result?.compras ?? []
+  const compras = useMemo(() => result?.compras ?? [], [result])
+  const comprasFiltradas = useMemo(
+    () => filtrarCompras(compras, filtros),
+    [compras, filtros],
+  )
 
   const renderView = () => {
     switch (activeView) {
-      case 'resumen':      return <ResumenView compras={compras} />
-      case 'tendencias':   return <TendenciasView compras={compras} />
-      case 'precios':      return <PreciosView compras={compras} />
-      case 'proveedores':  return <ProveedoresView compras={compras} />
-      case 'compradores':  return <CompradoresView compras={compras} />
-      case 'reportes':     return <ReportesView compras={compras} />
+      case 'resumen':     return <ResumenView compras={comprasFiltradas} />
+      case 'tendencias':  return <TendenciasView compras={comprasFiltradas} />
+      case 'precios':     return <PreciosView compras={comprasFiltradas} />
+      case 'proveedores': return <ProveedoresView compras={comprasFiltradas} />
+      case 'compradores': return <CompradoresView compras={comprasFiltradas} />
+      case 'reportes':    return <ReportesView compras={comprasFiltradas} />
     }
   }
 
   return (
     <Layout
       compras={compras}
+      filtros={filtros}
+      onFiltrosChange={setFiltros}
+      onLimpiarFiltros={() => setFiltros(FILTROS_VACÍOS)}
       ultimaActualizacion={ultimaActualizacion}
       onCargarArchivo={handleCargarArchivo}
       activeView={activeView}
       onNavigate={setActiveView}
     >
-      {/* Estado de carga inicial */}
       {cargando && (
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
@@ -75,7 +97,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Error */}
       {!cargando && error && (
         <div className="m-4 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
           <p className="text-[13px] text-red-400 font-500">Error al cargar el archivo</p>
@@ -83,7 +104,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Advertencias no fatales */}
       {!cargando && result && result.advertencias.length > 0 && (
         <div className="mb-4 p-3 rounded-lg bg-amber-500/8 border border-amber-500/15">
           <p className="text-[11px] text-amber-400/80 font-500">
@@ -92,7 +112,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Vista activa */}
       {!cargando && !error && renderView()}
     </Layout>
   )

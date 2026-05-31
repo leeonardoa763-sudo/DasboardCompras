@@ -3,7 +3,7 @@ import PlaceholderView from './PlaceholderView'
 
 interface Props { compras: Compra[] }
 
-export default function PreciosView({ compras: _ }: Props) {
+export default function PreciosView(_: Props) {
   return (
     <PlaceholderView
       color="emerald"

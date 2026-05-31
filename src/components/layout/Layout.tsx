@@ -2,13 +2,15 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Compra } from '../../data/schema'
 import type { FilterOptions, FiltrosActivos, ViewId } from './types'
-import { FILTROS_VACÍOS } from './types'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import FilterBar from './FilterBar'
 
 interface LayoutProps {
   compras: Compra[]
+  filtros: FiltrosActivos
+  onFiltrosChange: (f: FiltrosActivos) => void
+  onLimpiarFiltros: () => void
   ultimaActualizacion: Date | null
   onCargarArchivo: (file: File) => void
   activeView: ViewId
@@ -25,6 +27,9 @@ function buildFilterOptions(compras: Compra[]): FilterOptions {
 
 export default function Layout({
   compras,
+  filtros,
+  onFiltrosChange,
+  onLimpiarFiltros,
   ultimaActualizacion,
   onCargarArchivo,
   activeView,
@@ -32,13 +37,10 @@ export default function Layout({
   children,
 }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [filtros, setFiltros] = useState<FiltrosActivos>(FILTROS_VACÍOS)
-
   const opciones = buildFilterOptions(compras)
 
   return (
     <div className="flex h-full overflow-hidden">
-      {/* Sidebar fijo */}
       <Sidebar
         activeView={activeView}
         onNavigate={onNavigate}
@@ -46,7 +48,6 @@ export default function Layout({
         onClose={() => setSidebarOpen(false)}
       />
 
-      {/* Contenido principal — desplazado 240px en desktop */}
       <div className="flex-1 flex flex-col min-w-0 md:ml-60">
         <Header
           onToggleSidebar={() => setSidebarOpen((o) => !o)}
@@ -56,11 +57,10 @@ export default function Layout({
         <FilterBar
           opciones={opciones}
           filtros={filtros}
-          onChange={setFiltros}
-          onLimpiar={() => setFiltros(FILTROS_VACÍOS)}
+          onChange={onFiltrosChange}
+          onLimpiar={onLimpiarFiltros}
         />
 
-        {/* Área scrollable de contenido */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {children}
         </main>
