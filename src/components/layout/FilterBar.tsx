@@ -11,6 +11,7 @@ const hayFiltrosActivos = (f: FiltrosActivos) =>
   f.empresas.length > 0 ||
   f.compradores.length > 0 ||
   f.centros.length > 0 ||
+  f.tiposInsumo.length > 0 ||
   f.fechaDesde !== '' ||
   f.fechaHasta !== ''
 
@@ -43,6 +44,9 @@ export default function FilterBar({ opciones, filtros, onChange, onLimpiar }: Fi
 
   const setCentro = (val: string) =>
     onChange({ ...filtros, centros: val ? [Number(val)] : [] })
+
+  const setTipoInsumo = (val: string) =>
+    onChange({ ...filtros, tiposInsumo: val ? [val] : [] })
 
   return (
     <div className="flex-shrink-0 border-b border-[#1e2d45] bg-[#0a0f1c]">
@@ -94,6 +98,21 @@ export default function FilterBar({ opciones, filtros, onChange, onLimpiar }: Fi
             <option value="">Centro de costos</option>
             {opciones.centros.map((c) => (
               <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <ChevronIcon />
+        </div>
+
+        {/* Tipo de insumo */}
+        <div className="flex-shrink-0 relative">
+          <select
+            className={SELECT_CLASS}
+            value={filtros.tiposInsumo[0] ?? ''}
+            onChange={(e) => setTipoInsumo(e.target.value)}
+          >
+            <option value="">Tipo de insumo</option>
+            {opciones.tiposInsumo.map((t) => (
+              <option key={t} value={t}>{t}</option>
             ))}
           </select>
           <ChevronIcon />

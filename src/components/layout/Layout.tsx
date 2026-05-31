@@ -22,7 +22,8 @@ function buildFilterOptions(compras: Compra[]): FilterOptions {
   const empresas = [...new Set(compras.map((c) => c.empresa))].sort()
   const compradores = [...new Set(compras.map((c) => c.comprador))].sort()
   const centros = [...new Set(compras.map((c) => c.centroCostos))].sort((a, b) => a - b)
-  return { empresas, compradores, centros }
+  const tiposInsumo = [...new Set(compras.map((c) => c.tipoInsumo))].sort()
+  return { empresas, compradores, centros, tiposInsumo }
 }
 
 export default function Layout({

@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react'
 import {
   ComposedChart,
+  ScatterChart,
+  Scatter,
+  ZAxis,
   Line,
   XAxis,
   YAxis,
@@ -8,6 +11,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
   CartesianGrid,
+  Legend,
 } from 'recharts'
 import type { Compra } from '../data/schema'
 import {
@@ -114,17 +118,35 @@ function TendenciaChip({ t, pendiente }: { t: ResumenInsumo['tendencia']; pendie
   )
 }
 
-// ── Tooltip del gráfico ───────────────────────────────────────────────────────
+// ── Paleta de colores por empresa ────────────────────────────────────────────
+
+const EMPRESA_PALETTE = [
+  '#3b82f6', // blue
+  '#f59e0b', // amber
+  '#10b981', // emerald
+  '#8b5cf6', // violet
+  '#ef4444', // red
+  '#06b6d4', // cyan
+  '#f97316', // orange
+]
+
+function empresaColor(empresas: string[], empresa: string): string {
+  const idx = empresas.indexOf(empresa)
+  return idx >= 0 ? EMPRESA_PALETTE[idx % EMPRESA_PALETTE.length] : '#4d6480'
+}
+
+// ── Tooltips ──────────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function TooltipPrecio({ active, payload, label, mostrarIndice }: any) {
   if (!active || !payload?.length) return null
   const d = payload[0]?.payload as {
-    fechaLabel: string; precioUnitario: number; regresion: number | null; indice: number; proveedor: string
+    fechaLabel: string; precioUnitario: number; regresion: number | null
+    indice: number; proveedor: string; empresa: string; ordenCompra: number; cantidad: number
   }
   return (
-    <div className="bg-[#1a2438] border border-[#1e2d45] rounded-lg px-3 py-2 shadow-xl text-left min-w-[160px]">
-      <p className="text-[10px] text-[#4d6480] mb-1">{label ?? d.fechaLabel}</p>
+    <div className="bg-[#1a2438] border border-[#1e2d45] rounded-lg px-3 py-2 shadow-xl text-left min-w-[170px]">
+      <p className="text-[10px] text-[#4d6480] mb-1.5">{label ?? d.fechaLabel}</p>
       {mostrarIndice ? (
         <p className="text-[13px] font-600 text-blue-400">Índice: {d.indice?.toFixed(1)}</p>
       ) : (
@@ -133,9 +155,36 @@ function TooltipPrecio({ active, payload, label, mostrarIndice }: any) {
       {d.regresion !== null && !mostrarIndice && (
         <p className="text-[11px] text-amber-400/80 mt-0.5">Reg.: {fmtPu(d.regresion)}</p>
       )}
-      {d.proveedor && (
-        <p className="text-[10px] text-[#4d6480] mt-0.5 truncate max-w-[160px]">{d.proveedor}</p>
-      )}
+      <div className="mt-1.5 pt-1.5 border-t border-[#1e2d45] space-y-0.5">
+        {d.empresa     && <p className="text-[10px] text-[#8fa3be]">Empresa: <span className="text-[#e8edf5]">{d.empresa}</span></p>}
+        {d.proveedor   && <p className="text-[10px] text-[#8fa3be] truncate max-w-[170px]">Proveedor: <span className="text-[#e8edf5]">{d.proveedor}</span></p>}
+        {d.ordenCompra && <p className="text-[10px] text-[#8fa3be]">OC: <span className="text-[#e8edf5]">#{d.ordenCompra}</span></p>}
+        {d.cantidad    && <p className="text-[10px] text-[#8fa3be]">Cantidad: <span className="text-[#e8edf5]">{fmtNum(d.cantidad)}</span></p>}
+      </div>
+    </div>
+  )
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function TooltipTimeline({ active, payload }: any) {
+  if (!active || !payload?.length) return null
+  const d = payload[0]?.payload as {
+    fechaLabel: string; cantidad: number; precioUnitario: number
+    empresa: string; proveedor: string; ordenCompra: number; importe: number
+  }
+  return (
+    <div className="bg-[#1a2438] border border-[#1e2d45] rounded-lg px-3 py-2 shadow-xl text-left min-w-[180px]">
+      <p className="text-[10px] text-[#4d6480] mb-1.5">{d.fechaLabel}</p>
+      <div className="space-y-0.5">
+        <p className="text-[12px] font-600 text-[#e8edf5]">
+          OC <span className="text-blue-400">#{d.ordenCompra}</span>
+        </p>
+        <p className="text-[11px] text-[#8fa3be]">Empresa: <span className="text-[#e8edf5]">{d.empresa}</span></p>
+        <p className="text-[11px] text-[#8fa3be] truncate max-w-[180px]">Proveedor: <span className="text-[#e8edf5]">{d.proveedor}</span></p>
+        <p className="text-[11px] text-[#8fa3be]">Cantidad: <span className="text-emerald-400 font-600">{fmtNum(d.cantidad)}</span></p>
+        <p className="text-[11px] text-[#8fa3be]">Precio unit.: <span className="text-blue-400 font-600">{fmtPu(d.precioUnitario)}</span></p>
+        <p className="text-[11px] text-[#8fa3be]">Importe: <span className="text-amber-400 font-600">{fmt$(d.importe)}</span></p>
+      </div>
     </div>
   )
 }
@@ -173,9 +222,36 @@ function DetalleInsumo({
     regresion: reg ? +(reg.intercepto + reg.pendiente * p.diasDesdeInicio).toFixed(4) : null,
     indice: +indices[i].toFixed(2),
     proveedor: p.proveedor,
+    empresa: p.empresa,
+    ordenCompra: p.ordenCompra,
+    cantidad: p.cantidad,
+    importe: p.importe,
   }))
 
   const tieneCurva = puntos.length >= 2 && new Set(puntos.map((p) => p.diasDesdeInicio)).size >= 2
+
+  // Scatter data agrupado por empresa para la gráfica de timeline
+  const empresas = useMemo(
+    () => [...new Set(puntos.map((p) => p.empresa))].sort(),
+    [puntos]
+  )
+
+  const scatterPorEmpresa = useMemo(() => {
+    const groups = new Map<string, typeof puntos>()
+    for (const p of puntos) {
+      const arr = groups.get(p.empresa) ?? []
+      arr.push(p)
+      groups.set(p.empresa, arr)
+    }
+    return groups
+  }, [puntos])
+
+  const xDomain = useMemo((): [number, number] => {
+    if (puntos.length === 0) return [0, 1]
+    const times = puntos.map((p) => p.fecha.getTime())
+    const pad = 86_400_000 * 3 // 3 días de margen
+    return [Math.min(...times) - pad, Math.max(...times) + pad]
+  }, [puntos])
 
   const cvPct = resumen.puPromedio > 0
     ? (resumen.stdDev / resumen.puPromedio) * 100
@@ -349,15 +425,85 @@ function DetalleInsumo({
         </>
       )}
 
-      {/* Scatter de compras (tabla mini) */}
+      {/* ── Gráfica timeline de compras ── */}
+      {puntos.length > 0 && (
+        <div className="mt-5 pt-4 border-t border-[#1e2d45]/60">
+          <SectionLabel info="Cada burbuja es una orden de compra. El tamaño es proporcional al importe. Colores por empresa. Pasa el cursor sobre una burbuja para ver todos los detalles.">
+            Historial de compras en el tiempo · cantidad por OC
+          </SectionLabel>
+          <ResponsiveContainer width="100%" height={200}>
+            <ScatterChart margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2d45" vertical={false} />
+              <XAxis
+                type="number"
+                dataKey="x"
+                domain={xDomain}
+                scale="time"
+                tickFormatter={(ms: number) =>
+                  new Date(ms).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
+                }
+                tick={{ fontSize: 10, fill: '#4d6480' }}
+                tickLine={false}
+                axisLine={{ stroke: '#1e2d45' }}
+                name="Fecha"
+              />
+              <YAxis
+                type="number"
+                dataKey="y"
+                tick={{ fontSize: 10, fill: '#4d6480' }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v: number) => fmtNum(v)}
+                width={52}
+                name="Cantidad"
+              />
+              <ZAxis type="number" dataKey="z" range={[30, 220]} />
+              <Tooltip
+                content={<TooltipTimeline />}
+                cursor={{ strokeDasharray: '4 2', stroke: '#2a3f58' }}
+              />
+              {empresas.length > 1 && (
+                <Legend
+                  iconSize={8}
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: '10px', color: '#4d6480', paddingTop: '8px' }}
+                />
+              )}
+              {empresas.map((emp, i) => (
+                <Scatter
+                  key={emp}
+                  name={emp}
+                  data={(scatterPorEmpresa.get(emp) ?? []).map((p) => ({
+                    x: p.fecha.getTime(),
+                    y: p.cantidad,
+                    z: p.importe,
+                    fechaLabel: p.fechaLabel,
+                    precioUnitario: p.precioUnitario,
+                    empresa: p.empresa,
+                    proveedor: p.proveedor,
+                    ordenCompra: p.ordenCompra,
+                    importe: p.importe,
+                    cantidad: p.cantidad,
+                  }))}
+                  fill={EMPRESA_PALETTE[i % EMPRESA_PALETTE.length]}
+                  fillOpacity={0.82}
+                  strokeWidth={0}
+                />
+              ))}
+            </ScatterChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* ── Historial de compras (tabla) ── */}
       {puntos.length > 0 && (
         <div className="mt-4">
-          <SectionLabel>Historial de compras</SectionLabel>
+          <SectionLabel>Detalle por compra</SectionLabel>
           <div className="overflow-x-auto">
             <table className="w-full text-[11px] border-collapse">
               <thead>
                 <tr className="border-b border-[#1e2d45]">
-                  {['Fecha', 'Proveedor', 'Cantidad', 'Precio unit.', 'OC'].map((h) => (
+                  {['Fecha', 'Empresa', 'Proveedor', 'Cantidad', 'Precio unit.', 'Importe', 'OC'].map((h) => (
                     <th key={h} className="pb-2 pr-3 last:pr-0 text-left text-[9px] font-500 uppercase tracking-wider text-[#4d6480]">
                       {h}
                     </th>
@@ -368,10 +514,22 @@ function DetalleInsumo({
                 {[...puntos].reverse().map((p, i) => (
                   <tr key={i} className="border-b border-[#1e2d45]/30 hover:bg-white/[0.015]">
                     <td className="py-1.5 pr-3 text-[#8fa3be] whitespace-nowrap">{p.fechaLabel}</td>
-                    <td className="py-1.5 pr-3 text-[#e8edf5] max-w-[140px] truncate">{p.proveedor}</td>
+                    <td className="py-1.5 pr-3 whitespace-nowrap">
+                      <span
+                        className="text-[10px] font-500 px-1.5 py-0.5 rounded"
+                        style={{
+                          color: empresaColor(empresas, p.empresa),
+                          background: `${empresaColor(empresas, p.empresa)}18`,
+                        }}
+                      >
+                        {p.empresa}
+                      </span>
+                    </td>
+                    <td className="py-1.5 pr-3 text-[#e8edf5] max-w-[130px] truncate">{p.proveedor}</td>
                     <td className="py-1.5 pr-3 text-[#8fa3be] tabular-nums">{fmtNum(p.cantidad)}</td>
                     <td className="py-1.5 pr-3 text-blue-400 font-600 tabular-nums">{fmtPu(p.precioUnitario)}</td>
-                    <td className="py-1.5 pr-0 text-[#4d6480] tabular-nums">{p.ordenCompra}</td>
+                    <td className="py-1.5 pr-3 text-amber-400 tabular-nums">{fmt$(p.importe)}</td>
+                    <td className="py-1.5 pr-0 text-[#4d6480] tabular-nums">#{p.ordenCompra}</td>
                   </tr>
                 ))}
               </tbody>
@@ -385,7 +543,7 @@ function DetalleInsumo({
 
 // ── Vista principal ───────────────────────────────────────────────────────────
 
-type SortKey = 'descripcion' | 'puPromedio' | 'puMin' | 'puMax' | 'stdDev' | 'nCompras' | 'gastoTotal' | 'tendencia'
+type SortKey = 'descripcion' | 'puPromedio' | 'puMin' | 'puMax' | 'stdDev' | 'nCompras' | 'gastoTotal' | 'cantidadTotal' | 'tendencia'
 
 const HELP = {
   volatilidad:
@@ -514,14 +672,15 @@ export default function PreciosView({ compras }: Props) {
                 <ThBtn col="puMax"      label="Máx" />
                 <ThBtn col="stdDev"     label="Volatilidad" />
                 <ThBtn col="tendencia"  label="Tendencia" />
-                <ThBtn col="nCompras"   label="# OC" />
-                <ThBtn col="gastoTotal" label="Gasto" />
+                <ThBtn col="nCompras"      label="# OC" />
+                <ThBtn col="cantidadTotal" label="Cantidad" />
+                <ThBtn col="gastoTotal"    label="Gasto" />
               </tr>
             </thead>
             <tbody>
               {resumenFiltrado.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-[12px] text-[#4d6480]">
+                  <td colSpan={10} className="py-8 text-center text-[12px] text-[#4d6480]">
                     Sin insumos para "{busqueda}"
                   </td>
                 </tr>
@@ -582,6 +741,10 @@ export default function PreciosView({ compras }: Props) {
                       </td>
                       {/* # Compras */}
                       <td className="py-2.5 pr-3 text-[#8fa3be] tabular-nums text-center">{r.nCompras}</td>
+                      {/* Cantidad */}
+                      <td className="py-2.5 pr-3 text-[#8fa3be] tabular-nums whitespace-nowrap">
+                        {fmtNum(r.cantidadTotal)} <span className="text-[9px] text-[#4d6480]">{r.unidad}</span>
+                      </td>
                       {/* Gasto */}
                       <td className="py-2.5 pr-0 text-amber-400 font-600 tabular-nums whitespace-nowrap">
                         {fmt$(r.gastoTotal)}
