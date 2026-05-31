@@ -107,30 +107,31 @@ compras; mensaje claro para insumos con datos insuficientes.
 
 ---
 
-## Fase 6 — Proveedores, compradores y centros de costo
+## Fase 6 — Proveedores, compradores y centros de costo ✅ COMPLETADA
 **Objetivo:** rankings y negociación.
 
-- [ ] Ranking de proveedores por gasto, # OCs y ahorro generado.
-- [ ] Concentración de proveedores (% del gasto en el top proveedor / Pareto).
-- [ ] Comparativa de **precio del mismo insumo entre proveedores** (oportunidad de ahorro).
-- [ ] Ranking de **compradores**: gasto manejado y ahorro generado por cada uno.
-- [ ] Desglose por centro de costo.
+- [x] Ranking de proveedores por gasto, # OCs y ahorro generado.
+- [x] Concentración de proveedores (% del gasto en el top proveedor / Pareto).
+- [x] Comparativa de **precio del mismo insumo entre proveedores** (oportunidad de ahorro).
+- [x] Ranking de **compradores**: gasto manejado y ahorro generado por cada uno.
+- [x] Desglose por centro de costo.
+- [x] Desglose de ahorro por tipo de insumo y por insumo individual (`ahorroDesglose`).
 
-**Aceptación:** los rankings suman al total global; comparativa de precios identifica
-correctamente el proveedor más barato por insumo.
+**Aceptación:** ✅ los rankings suman al total global; comparativa de precios identifica
+correctamente el proveedor más barato por insumo; typecheck y lint limpios.
 
 ---
 
-## Fase 7 — Reportes mensuales y semanales
+## Fase 7 — Reportes mensuales y semanales ✅ COMPLETADA
 **Objetivo:** lo que se manda/imprime para dirección.
 
-- [ ] `analytics/reports.ts`: armar un reporte para un (mes) o (semana) elegidos.
-- [ ] Vista de reporte: encabezado, KPIs del periodo, tablas y comentario de variación.
-- [ ] Selector de periodo (mes / semana).
-- [ ] Botón **"Descargar PDF"** (html2canvas + jsPDF) y **"Imprimir"** con estilos print.
+- [x] `analytics/reports.ts`: armar un reporte para un (mes) o (semana) elegidos.
+- [x] Vista de reporte: encabezado, KPIs del periodo, tablas y comentario de variación.
+- [x] Selector de periodo (mes / semana).
+- [x] Botón **"Descargar PDF"** (html2canvas + jsPDF) y **"Imprimir"** con estilos print.
 
-**Aceptación:** elegir una semana/mes genera un reporte coherente y exportable a PDF
-legible.
+**Aceptación:** ✅ elegir una semana/mes genera un reporte coherente y exportable a PDF
+legible; typecheck y lint limpios.
 
 ---
 

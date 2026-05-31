@@ -5,7 +5,7 @@
 > está en `PLAN.md` (en raíz) y el detalle técnico en `ARQUITECTURA.md`.
 
 **Repositorio GitHub:** https://github.com/leeonardoa763-sudo/DasboardCompras  
-**Estado actual (2026-05-31):** Fases 0 ✅, 1 ✅, 2 ✅, 3 ✅, 4 ✅ y 5 ✅ completas. Siguiente: Fase 6 (Proveedores, compradores y centros de costo).
+**Estado actual (2026-05-31):** Fases 0 ✅, 1 ✅, 2 ✅, 3 ✅, 4 ✅, 5 ✅, 6 ✅ y 7 ✅ completas. Siguiente: Fase 8 (Modo presentación + pulido).
 
 ---
 
@@ -74,9 +74,9 @@ El parser debe mapear por nombre de encabezado, NO por posición.
 | # | Encabezado exacto en Excel | Nombre interno (TS) | Tipo | Significado / notas |
 |---|----------------------------|---------------------|------|---------------------|
 | 1 | `Empresa` | `empresa` | string | Empresa compradora (COEDESSA, TRIACO, CAPAM…). |
-| 2 | `CENTRO DE COSTOS` | `centroCostos` | number | Centro de costo / obra (ej. 149, 134, 138). |
-| 3 | `ODEN DE COMPRA` | `ordenCompra` | number | Folio de la orden de compra. (Errata: "ODEN".) |
-| 4 | `Fecha de compra` | `fecha` | Date | Fecha de la compra. |
+| 2 | `CC` | `centroCostos` | number | Centro de costo / obra (ej. 149, 134, 138). Abreviación de "CENTRO DE COSTOS". |
+| 3 | `OC` | `ordenCompra` | number | Folio de la orden de compra. Abreviación de "ODEN DE COMPRA". |
+| 4 | `Fecha` | `fecha` | Date | Fecha de la compra. Abreviación de "Fecha de compra". |
 | 5 | `id Proveedor` | `idProveedor` | number | Clave numérica del proveedor. |
 | 6 | `Proveedor` | `proveedor` | string | Nombre del proveedor. |
 | 7 | `Insumo` | `insumo` | number | Código numérico del material/insumo. |
