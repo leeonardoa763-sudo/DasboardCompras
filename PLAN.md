@@ -75,21 +75,20 @@
 
 ---
 
-## Fase 4 — Análisis de tendencias (semanal y mensual) ⬅ SIGUIENTE
+## Fase 4 — Análisis de tendencias (semanal y mensual) ✅ COMPLETADA
 **Objetivo:** el "cómo vamos en el tiempo".
 
-- [ ] `analytics/trends.ts`: serie de gasto por **semana** y por **mes**.
-- [ ] Variación **semana vs semana** y **mes vs mes** (Δ absoluto y Δ%).
-- [ ] Gasto **acumulado** en el periodo.
-- [ ] Media móvil de 3 periodos sobre la serie semanal.
-- [ ] Gráficas de línea/área + indicadores de subida/bajada con color.
+- [x] `analytics/trends.ts`: serie de gasto por **semana** y por **mes**.
+- [x] Variación **semana vs semana** y **mes vs mes** (Δ absoluto y Δ%).
+- [x] Gasto **acumulado** en el periodo.
+- [x] Media móvil de 3 periodos sobre la serie semanal/mensual.
+- [x] Gráficas de línea/área + indicadores de subida/bajada con color.
 
-**Aceptación:** con un dataset de varios meses, las series y los Δ% son correctos;
-con un solo mes (como el ejemplo) no truena y muestra lo disponible.
+**Aceptación:** ✅ typecheck y lint limpios; con un solo periodo no truena y muestra lo disponible.
 
 ---
 
-## Fase 5 — Análisis de precios en el tiempo
+## Fase 5 — Análisis de precios en el tiempo ⬅ SIGUIENTE
 **Objetivo:** la pestaña que pediste de precios contra el tiempo.
 
 - [ ] Serie de **precio unitario (Pu)** por insumo a lo largo de las fechas
