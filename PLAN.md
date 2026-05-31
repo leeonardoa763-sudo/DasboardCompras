@@ -6,40 +6,44 @@
 
 ---
 
-## Fase 0 — Setup del proyecto
+## Fase 0 — Setup del proyecto ✅ COMPLETADA
 **Objetivo:** repo vacío que ya hace deploy.
 
-- [ ] `npm create vite@latest dashboard-compras -- --template react-ts`
-- [ ] Instalar: `tailwindcss recharts xlsx papaparse simple-statistics html2canvas jspdf`
-- [ ] Configurar Tailwind (postcss + `index.css`).
-- [ ] Crear la estructura de carpetas de `CLAUDE.md §5`.
-- [ ] Subir a GitHub y conectar a **Vercel** (deploy automático en cada push).
-- [ ] Poner `public/data/ejemplo.xlsx` (el archivo de muestra).
+- [x] `npm create vite@latest dashboard-compras -- --template react-ts`
+- [x] Instalar: `tailwindcss recharts xlsx papaparse simple-statistics html2canvas jspdf`
+- [x] Configurar Tailwind (postcss + `index.css`).
+- [x] Crear la estructura de carpetas de `CLAUDE.md §5`.
+- [x] Repositorio en GitHub: https://github.com/leeonardoa763-sudo/DasboardCompras
+- [ ] Conectar a **Vercel** (deploy automático en cada push). ← PENDIENTE
+- [x] Poner `public/data/ejemplo.xlsx` (el archivo de muestra).
 
 **Aceptación:** `npm run dev` levanta una página "Hola" y existe una URL de Vercel viva.
+> Estado: la app corre en dev; Vercel aún sin conectar.
 
 ---
 
-## Fase 1 — Capa de datos
+## Fase 1 — Capa de datos ✅ COMPLETADA
 **Objetivo:** convertir cualquier Excel con la estructura fija en datos tipados y limpios.
 
-- [ ] `src/data/schema.ts`: tipo `Compra` + mapa de **encabezados exactos** (incluir las
+- [x] `src/data/schema.ts`: tipo `Compra` + mapa de **encabezados exactos** (incluir las
       erratas `ODEN DE COMPRA` y `%de Ahrro` — ver `CLAUDE.md §4`).
-- [ ] `src/data/loadExcel.ts`: leer `.xlsx` con SheetJS → filas crudas.
-- [ ] `src/data/normalize.ts`: crudo → `Compra[]` (parsear fechas, números, nulos).
-- [ ] Validación defensiva: si falta una columna o el tipo no cuadra, registrar el
+- [x] `src/data/loadExcel.ts`: leer `.xlsx` con SheetJS → filas crudas.
+      Expone `cargarDesdeArchivo(file)` y `cargarEjemplo()`.
+- [x] `src/data/normalize.ts`: crudo → `Compra[]` (parsear fechas, números, nulos).
+- [x] Validación defensiva: si falta una columna o el tipo no cuadra, registrar el
       problema y no tronar (devolver filas válidas + lista de advertencias).
-- [ ] `src/data/loadSheet.ts`: leer CSV publicado de Google Sheets con PapaParse.
+- [x] `src/data/loadSheet.ts`: leer CSV publicado de Google Sheets con PapaParse.
 
-**Aceptación:** una función `cargarCompras()` devuelve `Compra[]` correcto desde el
-`ejemplo.xlsx`; los totales coinciden con el Excel (Importe y Total+IVA).
+**Aceptación:** `cargarEjemplo()` devuelve `Compra[]` y la app muestra 4 KPIs básicos
+(filas, importe sin IVA, total+IVA, ahorro). ✅ Verificado en dev.
 
 ---
 
-## Fase 2 — Layout, navegación y tema
+## Fase 2 — Layout, navegación y tema ⬅ SIGUIENTE
 **Objetivo:** el "esqueleto" visual profesional.
 
-- [ ] `src/theme/`: tokens de color (paleta industrial/ejecutiva), tipografía, sombras.
+- [x] `src/theme/tokens.ts`: archivo creado (tokens pendientes de diseñar).
+- [ ] Diseñar paleta de color industrial/ejecutiva en `tokens.ts`.
 - [ ] Layout con barra lateral o superior: **Resumen · Tendencias · Precios ·
       Proveedores · Compradores · Reportes**.
 - [ ] Filtros globales: empresa, centro de costo, rango de fechas, comprador.

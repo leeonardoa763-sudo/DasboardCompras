@@ -2,7 +2,10 @@
 
 > Este archivo lo lee Claude Code automáticamente al iniciar cada sesión.
 > Contiene las reglas y hechos **permanentes** del proyecto. El plan paso a paso
-> está en `docs/PLAN.md` y el detalle técnico en `docs/ARQUITECTURA.md`.
+> está en `PLAN.md` (en raíz) y el detalle técnico en `ARQUITECTURA.md`.
+
+**Repositorio GitHub:** https://github.com/leeonardoa763-sudo/DasboardCompras  
+**Estado actual (2026-05-30):** Fase 0 ✅ y Fase 1 ✅ completas. Siguiente: Fase 2 (layout).
 
 ---
 
