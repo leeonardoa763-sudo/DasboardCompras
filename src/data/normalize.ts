@@ -1,0 +1,119 @@
+import { HEADERS } from './schema'
+import type { Compra, ParseResult } from './schema'
+
+type RawRow = Record<string, unknown>
+
+// ── Helpers de conversión defensivos ────────────────────────────────
+
+function toStr(v: unknown, fallback = ''): string {
+  if (v == null) return fallback
+  return String(v).trim()
+}
+
+function toNum(v: unknown): number | null {
+  if (v == null || v === '') return null
+  const n = typeof v === 'number' ? v : Number(String(v).replace(/,/g, ''))
+  return isFinite(n) ? n : null
+}
+
+function toDate(v: unknown): Date | null {
+  if (v == null) return null
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v
+  // SheetJS puede devolver número serial de Excel o string
+  if (typeof v === 'number') {
+    // Serial de Excel: días desde 1900-01-00 (con bug de 1900 como bisiesto)
+    const date = new Date(Math.round((v - 25569) * 86400 * 1000))
+    return isNaN(date.getTime()) ? null : date
+  }
+  if (typeof v === 'string') {
+    const d = new Date(v)
+    return isNaN(d.getTime()) ? null : d
+  }
+  return null
+}
+
+// ── Normalización de una fila ────────────────────────────────────────
+
+function normalizeRow(
+  raw: RawRow,
+  rowNum: number,
+  advertencias: string[],
+): Compra | null {
+  const warn = (msg: string) => advertencias.push(`Fila ${rowNum}: ${msg}`)
+
+  // Remapear por nombre de encabezado exacto
+  const mapped: Partial<Record<keyof Compra, unknown>> = {}
+  for (const [excelKey, field] of Object.entries(HEADERS)) {
+    if (excelKey in raw) {
+      mapped[field] = raw[excelKey]
+    }
+  }
+
+  // Verificar campos obligatorios mínimos
+  const empresa = toStr(mapped.empresa)
+  if (!empresa) { warn('campo "Empresa" vacío — fila omitida'); return null }
+
+  const fecha = toDate(mapped.fecha)
+  if (!fecha) { warn('"Fecha de compra" inválida — fila omitida'); return null }
+
+  const importe = toNum(mapped.importe)
+  if (importe == null) { warn('"Importe" no es número — fila omitida'); return null }
+
+  // Campos numéricos con fallback a 0 si vienen vacíos
+  const centroCostos     = toNum(mapped.centroCostos)     ?? 0
+  const ordenCompra      = toNum(mapped.ordenCompra)      ?? 0
+  const idProveedor      = toNum(mapped.idProveedor)      ?? 0
+  const insumo           = toNum(mapped.insumo)           ?? 0
+  const cantidad         = toNum(mapped.cantidad)         ?? 0
+  const precioUnitario   = toNum(mapped.precioUnitario)   ?? 0
+  const factorAhorro     = toNum(mapped.factorAhorro)     ?? 1
+  const ahorro           = toNum(mapped.ahorro)           ?? 0
+  const mes              = toNum(mapped.mes)              ?? fecha.getMonth() + 1
+  const semana           = toNum(mapped.semana)           ?? 0
+  const totalConIva      = toNum(mapped.totalConIva)      ?? importe * 1.16
+
+  return {
+    empresa,
+    centroCostos,
+    ordenCompra,
+    fecha,
+    idProveedor,
+    proveedor:      toStr(mapped.proveedor),
+    insumo,
+    descripcion:    toStr(mapped.descripcion),
+    cantidad,
+    unidad:         toStr(mapped.unidad),
+    precioUnitario,
+    moneda:         toStr(mapped.moneda, 'MN'),
+    importe,
+    tipoInsumo:     toStr(mapped.tipoInsumo),
+    notas:          mapped.notas != null ? toStr(mapped.notas) : null,
+    comprador:      toStr(mapped.comprador),
+    factorAhorro,
+    ahorro,
+    codComprador:   toStr(mapped.codComprador),
+    codAhorro:      toStr(mapped.codAhorro),
+    mes,
+    semana,
+    insumoClave:    toStr(mapped.insumoClave),
+    totalConIva,
+  }
+}
+
+// ── Punto de entrada público ─────────────────────────────────────────
+
+export function normalizeRows(rows: RawRow[]): ParseResult {
+  const compras: Compra[] = []
+  const advertencias: string[] = []
+
+  for (let i = 0; i < rows.length; i++) {
+    try {
+      const compra = normalizeRow(rows[i], i + 2, advertencias)
+      if (compra) compras.push(compra)
+    } catch (err) {
+      advertencias.push(`Fila ${i + 2}: error inesperado — ${err}`)
+    }
+  }
+
+  return { compras, advertencias }
+}

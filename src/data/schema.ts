@@ -1,0 +1,62 @@
+export interface Compra {
+  empresa: string
+  centroCostos: number
+  ordenCompra: number
+  fecha: Date
+  idProveedor: number
+  proveedor: string
+  insumo: number
+  descripcion: string
+  cantidad: number
+  unidad: string
+  precioUnitario: number   // Pu, sin IVA
+  moneda: string
+  importe: number          // sin IVA
+  tipoInsumo: string
+  notas: string | null
+  comprador: string
+  factorAhorro: number     // %de Ahrro — ver CLAUDE.md §4 nota sobre ahorro
+  ahorro: number           // monto MXN (usar este para KPIs)
+  codComprador: string
+  codAhorro: string
+  mes: number
+  semana: number
+  insumoClave: string
+  totalConIva: number      // = importe * 1.16
+}
+
+/**
+ * Mapa de encabezados EXACTOS del Excel al campo interno.
+ * ⚠️ Erratas intencionales: "ODEN DE COMPRA" (no "ORDEN") y "%de Ahrro" (no "Ahorro").
+ */
+export const HEADERS: Record<string, keyof Compra> = {
+  'Empresa':              'empresa',
+  'CENTRO DE COSTOS':     'centroCostos',
+  'ODEN DE COMPRA':       'ordenCompra',      // errata intencional
+  'Fecha de compra':      'fecha',
+  'id Proveedor':         'idProveedor',
+  'Proveedor':            'proveedor',
+  'Insumo':               'insumo',
+  'Descripcion':          'descripcion',
+  'Cantidad':             'cantidad',
+  'Unidad':               'unidad',
+  'Pu':                   'precioUnitario',
+  'Moneda':               'moneda',
+  'Importe':              'importe',
+  'Tipo De Insumo':       'tipoInsumo',
+  'Notas':                'notas',
+  'Comprador':            'comprador',
+  '%de Ahrro':            'factorAhorro',     // errata intencional
+  'Ahorro':               'ahorro',
+  'Codigo Comprador':     'codComprador',
+  'Codigo de ahorro':     'codAhorro',
+  'Mes':                  'mes',
+  'Semana':               'semana',
+  'InsumoClave':          'insumoClave',
+  'Total + IVA':          'totalConIva',
+}
+
+export interface ParseResult {
+  compras: Compra[]
+  advertencias: string[]
+}

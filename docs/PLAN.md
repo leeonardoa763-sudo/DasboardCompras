@@ -23,13 +23,13 @@
 ## Fase 1 — Capa de datos
 **Objetivo:** convertir cualquier Excel con la estructura fija en datos tipados y limpios.
 
-- [ ] `src/data/schema.ts`: tipo `Compra` + mapa de **encabezados exactos** (incluir las
+- [x] `src/data/schema.ts`: tipo `Compra` + mapa de **encabezados exactos** (incluir las
       erratas `ODEN DE COMPRA` y `%de Ahrro` — ver `CLAUDE.md §4`).
-- [ ] `src/data/loadExcel.ts`: leer `.xlsx` con SheetJS → filas crudas.
-- [ ] `src/data/normalize.ts`: crudo → `Compra[]` (parsear fechas, números, nulos).
-- [ ] Validación defensiva: si falta una columna o el tipo no cuadra, registrar el
+- [x] `src/data/loadExcel.ts`: leer `.xlsx` con SheetJS → filas crudas.
+- [x] `src/data/normalize.ts`: crudo → `Compra[]` (parsear fechas, números, nulos).
+- [x] Validación defensiva: si falta una columna o el tipo no cuadra, registrar el
       problema y no tronar (devolver filas válidas + lista de advertencias).
-- [ ] `src/data/loadSheet.ts`: leer CSV publicado de Google Sheets con PapaParse.
+- [x] `src/data/loadSheet.ts`: leer CSV publicado de Google Sheets con PapaParse.
 
 **Aceptación:** una función `cargarCompras()` devuelve `Compra[]` correcto desde el
 `ejemplo.xlsx`; los totales coinciden con el Excel (Importe y Total+IVA).
