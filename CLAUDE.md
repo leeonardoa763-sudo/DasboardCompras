@@ -5,7 +5,7 @@
 > está en `PLAN.md` (en raíz) y el detalle técnico en `ARQUITECTURA.md`.
 
 **Repositorio GitHub:** https://github.com/leeonardoa763-sudo/DasboardCompras  
-**Estado actual (2026-05-31):** Fases 0 ✅, 1 ✅ y 2 ✅ completas. Siguiente: Fase 3 (Resumen Ejecutivo — KPIs).
+**Estado actual (2026-05-30):** Fases 0 ✅, 1 ✅, 2 ✅ y 3 ✅ completas. Siguiente: Fase 4 (Análisis de Tendencias).
 
 ---
 
@@ -118,28 +118,34 @@ El parser debe mapear por nombre de encabezado, NO por posición.
 ```
 dashboard-compras/
 ├── CLAUDE.md                  # este archivo
-├── docs/
-│   ├── PLAN.md                # roadmap por fases (leer al planear)
-│   └── ARQUITECTURA.md        # data flow, módulos, fórmulas de tendencia
+├── PLAN.md                    # roadmap por fases (leer al planear)
 ├── public/
-│   └── data/ejemplo.xlsx      # dataset de muestra
+│   └── data/ejemplo.xlsx      # dataset de muestra (nunca subir el real)
 ├── src/
 │   ├── data/                  # carga y normalización del Excel/CSV
-│   │   ├── schema.ts          # tipos + mapa de encabezados exactos
-│   │   ├── loadExcel.ts       # SheetJS
-│   │   ├── loadSheet.ts       # PapaParse (Google Sheets CSV)
-│   │   └── normalize.ts       # Excel crudo -> Compra[] tipado
+│   │   ├── schema.ts          # tipos Compra + mapa de encabezados exactos
+│   │   ├── loadExcel.ts       # SheetJS: cargarEjemplo() y cargarDesdeArchivo()
+│   │   ├── loadSheet.ts       # PapaParse (Google Sheets CSV publicado)
+│   │   └── normalize.ts       # Excel crudo → Compra[] tipado
 │   ├── analytics/             # TODO el cálculo vive aquí (sin React)
-│   │   ├── selectors.ts       # agrupaciones y agregados
-│   │   ├── trends.ts          # regresión, medias móviles, deltas
-│   │   └── reports.ts         # armado de reporte semanal/mensual
-│   ├── components/            # UI tonta (recibe props ya calculadas)
-│   │   ├── layout/            # Sidebar, Header, FilterBar, Layout, types
-│   │   ├── kpi/  charts/  tables/   # (Fases 3+)
-│   ├── views/                 # Resumen, Tendencias, Precios, Proveedores…
-│   │   └── PlaceholderView.tsx  # Componente compartido de placeholder
-│   ├── theme/                 # tokens de color, tipografía (tokens.ts)
-│   └── App.tsx
+│   │   ├── selectors.ts       # ✅ agrupaciones, KPIs, timeline, ranking, ultimas
+│   │   ├── trends.ts          # (Fase 4) regresión, medias móviles, deltas
+│   │   └── reports.ts         # (Fase 7) armado de reporte semanal/mensual
+│   ├── components/
+│   │   ├── layout/            # ✅ Sidebar, Header, FilterBar, Layout, types
+│   │   └── kpi/               # ✅ KpiCard.tsx
+│   ├── utils/
+│   │   └── format.ts          # ✅ fmt$, fmtPct, fmtNum, fmtFecha (es-MX)
+│   ├── views/                 # ✅ ResumenView completo; demás con PlaceholderView
+│   │   ├── ResumenView.tsx    # ✅ KPIs, donut, empresa, timeline, ranking, tabla
+│   │   ├── TendenciasView.tsx # (Fase 4)
+│   │   ├── PreciosView.tsx    # (Fase 5)
+│   │   ├── ProveedoresView.tsx# (Fase 6)
+│   │   ├── CompradoresView.tsx# (Fase 6)
+│   │   ├── ReportesView.tsx   # (Fase 7)
+│   │   └── PlaceholderView.tsx
+│   ├── theme/tokens.ts        # ✅ colores, tipografía, sombras
+│   └── App.tsx                # ✅ filtros globales con useMemo, filtrarCompras()
 └── ...
 ```
 
