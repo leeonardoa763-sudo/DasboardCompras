@@ -1,64 +1,99 @@
 import { useEffect, useState } from 'react'
-import { cargarEjemplo } from './data/loadExcel'
+import { cargarEjemplo, cargarDesdeArchivo } from './data/loadExcel'
 import { gastoTotal, ahorroTotal } from './analytics/selectors'
 import type { ParseResult } from './data/schema'
+import type { ViewId } from './components/layout/types'
+import Layout from './components/layout/Layout'
+import ResumenView from './views/ResumenView'
+import TendenciasView from './views/TendenciasView'
+import PreciosView from './views/PreciosView'
+import ProveedoresView from './views/ProveedoresView'
+import CompradoresView from './views/CompradoresView'
+import ReportesView from './views/ReportesView'
 
-const fmt = (n: number) =>
-  '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+// gastoTotal y ahorroTotal se mantienen importados; se usarán en Fase 3
+void gastoTotal
+void ahorroTotal
 
 export default function App() {
   const [result, setResult] = useState<ParseResult | null>(null)
+  const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [activeView, setActiveView] = useState<ViewId>('resumen')
+  const [ultimaActualizacion, setUltimaActualizacion] = useState<Date | null>(null)
 
   useEffect(() => {
     cargarEjemplo()
-      .then(setResult)
+      .then((r) => {
+        setResult(r)
+        setUltimaActualizacion(new Date())
+      })
       .catch((e: unknown) => setError(String(e)))
+      .finally(() => setCargando(false))
   }, [])
 
+  const handleCargarArchivo = (file: File) => {
+    setCargando(true)
+    setError(null)
+    cargarDesdeArchivo(file)
+      .then((r) => {
+        setResult(r)
+        setUltimaActualizacion(new Date())
+      })
+      .catch((e: unknown) => setError(String(e)))
+      .finally(() => setCargando(false))
+  }
+
   const compras = result?.compras ?? []
-  const advertencias = result?.advertencias ?? []
+
+  const renderView = () => {
+    switch (activeView) {
+      case 'resumen':      return <ResumenView compras={compras} />
+      case 'tendencias':   return <TendenciasView compras={compras} />
+      case 'precios':      return <PreciosView compras={compras} />
+      case 'proveedores':  return <ProveedoresView compras={compras} />
+      case 'compradores':  return <CompradoresView compras={compras} />
+      case 'reportes':     return <ReportesView compras={compras} />
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-8 font-mono">
-      <h1 className="text-3xl font-bold mb-6 text-amber-400">
-        Dashboard de Compras
-      </h1>
-
-      {error && (
-        <p className="text-red-400 mb-4">Error: {error}</p>
-      )}
-
-      {result && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 max-w-lg">
-            <Stat label="Filas cargadas"     value={String(compras.length)} />
-            <Stat label="Importe sin IVA"    value={fmt(gastoTotal(compras, false))} />
-            <Stat label="Total + IVA"        value={fmt(gastoTotal(compras, true))} />
-            <Stat label="Ahorro total"       value={fmt(ahorroTotal(compras))} />
+    <Layout
+      compras={compras}
+      ultimaActualizacion={ultimaActualizacion}
+      onCargarArchivo={handleCargarArchivo}
+      activeView={activeView}
+      onNavigate={setActiveView}
+    >
+      {/* Estado de carga inicial */}
+      {cargando && (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-[13px] text-[#4d6480]">Cargando datos…</p>
           </div>
-
-          {advertencias.length > 0 && (
-            <div className="mt-4 p-4 bg-yellow-900/40 rounded text-yellow-300 text-sm">
-              <p className="font-bold mb-2">Advertencias ({advertencias.length}):</p>
-              {advertencias.map((w, i) => <p key={i}>{w}</p>)}
-            </div>
-          )}
         </div>
       )}
 
-      {!result && !error && (
-        <p className="text-gray-400">Cargando datos…</p>
+      {/* Error */}
+      {!cargando && error && (
+        <div className="m-4 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+          <p className="text-[13px] text-red-400 font-500">Error al cargar el archivo</p>
+          <p className="text-[12px] text-red-400/70 mt-1">{error}</p>
+        </div>
       )}
-    </div>
-  )
-}
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-gray-800 rounded p-4">
-      <p className="text-xs text-gray-400 mb-1">{label}</p>
-      <p className="text-xl font-bold">{value}</p>
-    </div>
+      {/* Advertencias no fatales */}
+      {!cargando && result && result.advertencias.length > 0 && (
+        <div className="mb-4 p-3 rounded-lg bg-amber-500/8 border border-amber-500/15">
+          <p className="text-[11px] text-amber-400/80 font-500">
+            {result.advertencias.length} advertencia{result.advertencias.length > 1 ? 's' : ''} al parsear el archivo
+          </p>
+        </div>
+      )}
+
+      {/* Vista activa */}
+      {!cargando && !error && renderView()}
+    </Layout>
   )
 }
