@@ -15,6 +15,7 @@ interface LayoutProps {
   onCargarArchivo: (file: File) => void
   activeView: ViewId
   onNavigate: (view: ViewId) => void
+  onPresentar?: () => void
   children: ReactNode
 }
 
@@ -23,7 +24,8 @@ function buildFilterOptions(compras: Compra[]): FilterOptions {
   const compradores = [...new Set(compras.map((c) => c.comprador))].sort()
   const centros = [...new Set(compras.map((c) => c.centroCostos))].sort((a, b) => a - b)
   const tiposInsumo = [...new Set(compras.map((c) => c.tipoInsumo))].sort()
-  return { empresas, compradores, centros, tiposInsumo }
+  const proveedores = [...new Set(compras.map((c) => c.proveedor).filter(Boolean))].sort()
+  return { empresas, compradores, centros, tiposInsumo, proveedores }
 }
 
 export default function Layout({
@@ -35,6 +37,7 @@ export default function Layout({
   onCargarArchivo,
   activeView,
   onNavigate,
+  onPresentar,
   children,
 }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -54,6 +57,7 @@ export default function Layout({
           onToggleSidebar={() => setSidebarOpen((o) => !o)}
           ultimaActualizacion={ultimaActualizacion}
           onCargarArchivo={onCargarArchivo}
+          onPresentar={onPresentar}
         />
         <FilterBar
           opciones={opciones}

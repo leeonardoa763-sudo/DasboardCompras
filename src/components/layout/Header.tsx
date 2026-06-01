@@ -4,6 +4,7 @@ interface HeaderProps {
   onToggleSidebar: () => void
   ultimaActualizacion: Date | null
   onCargarArchivo: (file: File) => void
+  onPresentar?: () => void
 }
 
 function formatFecha(date: Date): string {
@@ -16,7 +17,7 @@ function formatFecha(date: Date): string {
   })
 }
 
-export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarArchivo }: HeaderProps) {
+export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarArchivo, onPresentar }: HeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,6 +67,22 @@ export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarA
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
             <span className="hidden sm:inline">{formatFecha(ultimaActualizacion)}</span>
           </span>
+        )}
+
+        {/* Botón Presentar */}
+        {onPresentar && (
+          <button
+            onClick={onPresentar}
+            className="hidden sm:flex items-center gap-2 h-8 px-3 rounded-lg text-[12px] font-500 text-[#8fa3be] bg-[#141c2e] border border-[#1e2d45] hover:border-amber-500/40 hover:text-amber-400 transition-all duration-150"
+            title="Modo presentación a pantalla completa"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="1" y="2" width="12" height="9" rx="1" />
+              <line x1="4" y1="13" x2="10" y2="13" />
+              <line x1="7" y1="11" x2="7" y2="13" />
+            </svg>
+            Presentar
+          </button>
         )}
 
         {/* Botón Google Sheets */}

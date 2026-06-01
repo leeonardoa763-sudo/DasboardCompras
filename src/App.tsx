@@ -5,6 +5,7 @@ import type { Compra } from './data/schema'
 import type { ViewId, FiltrosActivos } from './components/layout/types'
 import { FILTROS_VACÍOS } from './components/layout/types'
 import Layout from './components/layout/Layout'
+import PresentacionMode from './components/presentacion/PresentacionMode'
 import ResumenView from './views/ResumenView'
 import TendenciasView from './views/TendenciasView'
 import PreciosView from './views/PreciosView'
@@ -18,6 +19,7 @@ function filtrarCompras(compras: Compra[], f: FiltrosActivos): Compra[] {
     if (f.compradores.length > 0 && !f.compradores.includes(c.comprador)) return false
     if (f.centros.length > 0 && !f.centros.includes(c.centroCostos)) return false
     if (f.tiposInsumo.length > 0 && !f.tiposInsumo.includes(c.tipoInsumo)) return false
+    if (f.proveedores.length > 0 && !f.proveedores.includes(c.proveedor)) return false
     if (f.fechaDesde) {
       if (c.fecha < new Date(f.fechaDesde)) return false
     }
@@ -37,6 +39,7 @@ export default function App() {
   const [activeView, setActiveView] = useState<ViewId>('resumen')
   const [ultimaActualizacion, setUltimaActualizacion] = useState<Date | null>(null)
   const [filtros, setFiltros] = useState<FiltrosActivos>(FILTROS_VACÍOS)
+  const [modoPresent, setModoPresent] = useState(false)
 
   useEffect(() => {
     cargarEjemplo()
@@ -78,17 +81,8 @@ export default function App() {
     }
   }
 
-  return (
-    <Layout
-      compras={compras}
-      filtros={filtros}
-      onFiltrosChange={setFiltros}
-      onLimpiarFiltros={() => setFiltros(FILTROS_VACÍOS)}
-      ultimaActualizacion={ultimaActualizacion}
-      onCargarArchivo={handleCargarArchivo}
-      activeView={activeView}
-      onNavigate={setActiveView}
-    >
+  const content = (
+    <>
       {cargando && (
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
@@ -105,15 +99,53 @@ export default function App() {
         </div>
       )}
 
-      {!cargando && result && result.advertencias.length > 0 && (
+      {!cargando && result && result.advertencias.length > 0 && result.compras.length === 0 && (
+        <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+          <p className="text-[11px] text-red-400 font-500 mb-1">
+            No se pudieron leer datos del archivo ({result.advertencias.length} advertencia{result.advertencias.length > 1 ? 's' : ''})
+          </p>
+          {result.advertencias.slice(0, 3).map((a, i) => (
+            <p key={i} className="text-[10px] text-red-400/70 font-mono leading-relaxed">{a}</p>
+          ))}
+        </div>
+      )}
+      {!cargando && result && result.advertencias.length > 0 && result.compras.length > 0 && (
         <div className="mb-4 p-3 rounded-lg bg-amber-500/8 border border-amber-500/15">
           <p className="text-[11px] text-amber-400/80 font-500">
-            {result.advertencias.length} advertencia{result.advertencias.length > 1 ? 's' : ''} al parsear el archivo
+            {result.advertencias.length} fila{result.advertencias.length > 1 ? 's' : ''} omitida{result.advertencias.length > 1 ? 's' : ''} al parsear · {result.compras.length} filas cargadas
           </p>
         </div>
       )}
 
       {!cargando && !error && renderView()}
+    </>
+  )
+
+  if (modoPresent) {
+    return (
+      <PresentacionMode
+        activeView={activeView}
+        onNavigate={setActiveView}
+        onExit={() => setModoPresent(false)}
+      >
+        {!cargando && !error && renderView()}
+      </PresentacionMode>
+    )
+  }
+
+  return (
+    <Layout
+      compras={compras}
+      filtros={filtros}
+      onFiltrosChange={setFiltros}
+      onLimpiarFiltros={() => setFiltros(FILTROS_VACÍOS)}
+      ultimaActualizacion={ultimaActualizacion}
+      onCargarArchivo={handleCargarArchivo}
+      activeView={activeView}
+      onNavigate={setActiveView}
+      onPresentar={() => setModoPresent(true)}
+    >
+      {content}
     </Layout>
   )
 }
