@@ -135,14 +135,14 @@ legible; typecheck y lint limpios.
 
 ---
 
-## Fase 8 — Modo presentación + pulido
+## Fase 8 — Modo presentación + pulido ✅ COMPLETADA
 **Objetivo:** que se vea de empresa multimillonaria en la junta.
 
-- [ ] Modo presentación a pantalla completa (secciones como "slides", navegación con
+- [x] Modo presentación a pantalla completa (secciones como "slides", navegación con
       flechas), sin menús distractores.
-- [ ] Animaciones sobrias de entrada de KPIs/gráficas.
-- [ ] Estados vacíos y de carga bien resueltos.
-- [ ] Revisión final de tipografía, espaciados y contraste.
+- [x] Animaciones sobrias de entrada de KPIs/gráficas (kpi-grid escalonado, slide-enter).
+- [x] Estados vacíos y de carga bien resueltos.
+- [x] Revisión final de tipografía, espaciados y contraste.
 
 **Aceptación:** se puede dar toda la junta desde el modo presentación sin tocar el menú.
 

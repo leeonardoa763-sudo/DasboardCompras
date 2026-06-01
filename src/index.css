@@ -78,3 +78,32 @@ body {
 .transition-base {
   transition: all 0.2s ease;
 }
+
+/* ── Animaciones de entrada ───────────────────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-up {
+  animation: fadeSlideUp 0.35s ease both;
+}
+
+/* KPI grid: cada tarjeta entra con un delay escalonado */
+.kpi-grid > *:nth-child(1) { animation: fadeSlideUp 0.35s ease both; animation-delay: 0ms; }
+.kpi-grid > *:nth-child(2) { animation: fadeSlideUp 0.35s ease both; animation-delay: 55ms; }
+.kpi-grid > *:nth-child(3) { animation: fadeSlideUp 0.35s ease both; animation-delay: 110ms; }
+.kpi-grid > *:nth-child(4) { animation: fadeSlideUp 0.35s ease both; animation-delay: 165ms; }
+.kpi-grid > *:nth-child(5) { animation: fadeSlideUp 0.35s ease both; animation-delay: 220ms; }
+.kpi-grid > *:nth-child(6) { animation: fadeSlideUp 0.35s ease both; animation-delay: 275ms; }
+.kpi-grid > *:nth-child(7) { animation: fadeSlideUp 0.35s ease both; animation-delay: 330ms; }
+
+/* Slide de presentación */
+.slide-enter {
+  animation: slideIn 0.3s ease both;
+}
