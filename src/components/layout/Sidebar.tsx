@@ -19,16 +19,7 @@ const NAV_ITEMS: NavItem[] = [
       </svg>
     ),
   },
-  {
-    id: 'tendencias',
-    label: 'Tendencias',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="2,13 6,8 10,11 16,4" />
-        <polyline points="12,4 16,4 16,8" />
-      </svg>
-    ),
-  },
+  // { id: 'tendencias', label: 'Tendencias', icon: (<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="2,13 6,8 10,11 16,4" /><polyline points="12,4 16,4 16,8" /></svg>) },
   {
     id: 'precios',
     label: 'Precios',
@@ -103,14 +94,14 @@ export default function Sidebar({ activeView, onNavigate, isOpen, onClose }: Sid
       <aside
         className={[
           'fixed inset-y-0 left-0 z-40 w-60 flex flex-col',
-          'bg-[#0a0f1c] border-r border-[#1e2d45]',
+          'bg-[var(--bg-base)] border-r border-[var(--border)]',
           'transition-transform duration-200 ease-in-out',
           'md:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
       >
         {/* Logo */}
-        <div className="h-14 flex items-center gap-3 px-5 border-b border-[#1e2d45]">
+        <div className="h-14 flex items-center gap-3 px-5 border-b border-[var(--border)]">
           <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
             <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <rect x="1" y="7" width="3" height="7" rx="0.5" />
@@ -119,14 +110,14 @@ export default function Sidebar({ activeView, onNavigate, isOpen, onClose }: Sid
             </svg>
           </div>
           <div>
-            <p className="text-[13px] font-600 text-[#e8edf5] leading-none">Dashboard</p>
-            <p className="text-[10px] text-[#4d6480] mt-0.5 leading-none tracking-wide uppercase">Compras</p>
+            <p className="text-[13px] font-600 text-[var(--text-primary)] leading-none">Dashboard</p>
+            <p className="text-[10px] text-[var(--text-muted)] mt-0.5 leading-none tracking-wide uppercase">Compras</p>
           </div>
         </div>
 
         {/* Navegación */}
         <nav className="flex-1 py-3 overflow-y-auto">
-          <p className="px-5 mb-2 text-[10px] font-500 text-[#4d6480] tracking-widest uppercase">
+          <p className="px-5 mb-2 text-[10px] font-500 text-[var(--text-muted)] tracking-widest uppercase">
             Módulos
           </p>
           <ul className="space-y-0.5 px-2">
@@ -141,13 +132,13 @@ export default function Sidebar({ activeView, onNavigate, isOpen, onClose }: Sid
                       'transition-all duration-150 text-left relative',
                       active
                         ? 'bg-amber-500/10 text-amber-400'
-                        : 'text-[#8fa3be] hover:bg-[#141c2e] hover:text-[#e8edf5]',
+                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card)] hover:text-[var(--text-primary)]',
                     ].join(' ')}
                   >
                     {active && (
                       <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-amber-400 rounded-r" />
                     )}
-                    <span className={active ? 'text-amber-400' : 'text-[#4d6480]'}>
+                    <span className={active ? 'text-amber-400' : 'text-[var(--text-muted)]'}>
                       {item.icon}
                     </span>
                     {item.label}
@@ -159,12 +150,12 @@ export default function Sidebar({ activeView, onNavigate, isOpen, onClose }: Sid
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-[#1e2d45]">
+        <div className="p-4 border-t border-[var(--border)]">
           <a
             href="https://deerflow.tech"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[10px] text-[#2a3f58] hover:text-[#4d6480] transition-colors duration-150"
+            className="flex items-center gap-1.5 text-[10px] text-[var(--color-subtle)] hover:text-[var(--text-muted)] transition-colors duration-150"
           >
             <span className="text-[8px]">✦</span>
             <span>Deerflow</span>

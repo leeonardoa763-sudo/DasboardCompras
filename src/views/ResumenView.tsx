@@ -26,11 +26,11 @@ const PALETTE = [
 function TooltipMoneda({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-[#1a2438] border border-[#1e2d45] rounded-lg px-3 py-2 shadow-xl text-left">
-      {label && <p className="text-[10px] text-[#4d6480] mb-1">{label}</p>}
+    <div className="bg-[var(--bg-card-hover)] border border-[var(--border)] rounded-lg px-3 py-2 shadow-xl text-left">
+      {label && <p className="text-[10px] text-[var(--text-muted)] mb-1">{label}</p>}
       <p className="text-[13px] font-600 text-amber-400">{fmt$(payload[0].value as number)}</p>
       {payload[1] && (
-        <p className="text-[11px] text-[#8fa3be] mt-0.5">+IVA: {fmt$(payload[1].value as number)}</p>
+        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">+IVA: {fmt$(payload[1].value as number)}</p>
       )}
     </div>
   )
@@ -41,8 +41,8 @@ function TooltipDonut({ active, payload }: any) {
   if (!active || !payload?.length) return null
   const d = payload[0]
   return (
-    <div className="bg-[#1a2438] border border-[#1e2d45] rounded-lg px-3 py-2 shadow-xl">
-      <p className="text-[10px] text-[#4d6480] mb-1">{d.name as string}</p>
+    <div className="bg-[var(--bg-card-hover)] border border-[var(--border)] rounded-lg px-3 py-2 shadow-xl">
+      <p className="text-[10px] text-[var(--text-muted)] mb-1">{d.name as string}</p>
       <p className="text-[13px] font-600" style={{ color: d.payload.fill as string }}>
         {fmt$(d.value as number)}
       </p>
@@ -52,7 +52,7 @@ function TooltipDonut({ active, payload }: any) {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-[10px] font-600 uppercase tracking-widest text-[#4d6480] mb-3">
+    <h2 className="text-[10px] font-600 uppercase tracking-widest text-[var(--text-muted)] mb-3">
       {children}
     </h2>
   )
@@ -60,7 +60,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-[#141c2e] border border-[#1e2d45] rounded-xl p-4 ${className}`}>
+    <div className={`bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-4 ${className}`}>
       {children}
     </div>
   )
@@ -69,12 +69,12 @@ function Card({ children, className = '' }: { children: React.ReactNode; classNa
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3">
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#4d6480" strokeWidth="1.2" strokeLinecap="round">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="var(--text-muted)" strokeWidth="1.2" strokeLinecap="round">
         <circle cx="20" cy="20" r="16" />
         <line x1="20" y1="12" x2="20" y2="20" />
-        <circle cx="20" cy="27" r="1" fill="#4d6480" stroke="none" />
+        <circle cx="20" cy="27" r="1" fill="var(--text-muted)" stroke="none" />
       </svg>
-      <p className="text-[13px] text-[#4d6480]">Sin datos para los filtros seleccionados</p>
+      <p className="text-[13px] text-[var(--text-muted)]">Sin datos para los filtros seleccionados</p>
     </div>
   )
 }
@@ -83,13 +83,13 @@ function EmptyState() {
 function BarProgress({ pct }: { pct: number }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 rounded-full bg-[#1e2d45] overflow-hidden">
+      <div className="flex-1 h-1.5 rounded-full bg-[var(--border)] overflow-hidden">
         <div
           className="h-full rounded-full bg-amber-500"
           style={{ width: `${Math.max(pct * 100, 2)}%` }}
         />
       </div>
-      <span className="text-[10px] text-[#8fa3be] tabular-nums w-10 text-right">
+      <span className="text-[10px] text-[var(--text-secondary)] tabular-nums w-10 text-right">
         {fmtPct(pct)}
       </span>
     </div>
@@ -119,7 +119,7 @@ export default function ResumenView({ compras }: Props) {
     const top = porTipo.slice(0, 6)
     const resto = porTipo.slice(6).reduce((s, g) => s + g.importe, 0)
     const slices = top.map((g, i) => ({ name: g.nombre, value: g.importe, fill: PALETTE[i] }))
-    if (resto > 0) slices.push({ name: 'Otros', value: resto, fill: '#2a3f58' })
+    if (resto > 0) slices.push({ name: 'Otros', value: resto, fill: 'var(--color-subtle)' })
     return slices
   })()
 
@@ -173,8 +173,8 @@ export default function ResumenView({ compras }: Props) {
               {donutData.map((d) => (
                 <li key={d.name} className="flex items-center gap-2 min-w-0">
                   <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.fill }} />
-                  <span className="text-[11px] text-[#8fa3be] truncate flex-1">{d.name}</span>
-                  <span className="text-[11px] text-[#e8edf5] font-600 flex-shrink-0 tabular-nums">
+                  <span className="text-[11px] text-[var(--text-secondary)] truncate flex-1">{d.name}</span>
+                  <span className="text-[11px] text-[var(--text-primary)] font-600 flex-shrink-0 tabular-nums">
                     {fmt$(d.value)}
                   </span>
                 </li>
@@ -196,7 +196,7 @@ export default function ResumenView({ compras }: Props) {
               <YAxis
                 type="category"
                 dataKey="nombre"
-                tick={{ fontSize: 11, fill: '#8fa3be' }}
+                tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
                 width={90}
                 tickLine={false}
                 axisLine={false}
@@ -231,12 +231,12 @@ export default function ResumenView({ compras }: Props) {
               </defs>
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 10, fill: '#4d6480' }}
+                tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                 tickLine={false}
-                axisLine={{ stroke: '#1e2d45' }}
+                axisLine={{ stroke: 'var(--border)' }}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: '#4d6480' }}
+                tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                 tickFormatter={(v: number) => {
                   if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`
                   if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}k`
@@ -253,8 +253,8 @@ export default function ResumenView({ compras }: Props) {
                 stroke="#f59e0b"
                 strokeWidth={2}
                 fill="url(#gradTimeline)"
-                dot={{ r: 3, fill: '#f59e0b', stroke: '#080c14', strokeWidth: 2 }}
-                activeDot={{ r: 5, fill: '#f59e0b', stroke: '#080c14', strokeWidth: 2 }}
+                dot={{ r: 3, fill: '#f59e0b', stroke: 'var(--bg-base)', strokeWidth: 2 }}
+                activeDot={{ r: 5, fill: '#f59e0b', stroke: 'var(--bg-base)', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -274,7 +274,7 @@ export default function ResumenView({ compras }: Props) {
             <YAxis
               type="category"
               dataKey="nombre"
-              tick={{ fontSize: 11, fill: '#8fa3be' }}
+              tick={{ fontSize: 11, fill: 'var(--text-secondary)' }}
               width={58}
               tickLine={false}
               axisLine={false}
@@ -295,11 +295,11 @@ export default function ResumenView({ compras }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full text-[12px] border-collapse">
             <thead>
-              <tr className="border-b border-[#1e2d45]">
+              <tr className="border-b border-[var(--border)]">
                 {['#', 'Tipo de insumo', 'Gasto sin IVA', '% del total', 'OCs', 'Insumo principal'].map((h) => (
                   <th
                     key={h}
-                    className="pb-2.5 pr-4 last:pr-0 text-left text-[10px] font-500 uppercase tracking-wider text-[#4d6480]"
+                    className="pb-2.5 pr-4 last:pr-0 text-left text-[10px] font-500 uppercase tracking-wider text-[var(--text-muted)]"
                   >
                     {h}
                   </th>
@@ -310,10 +310,10 @@ export default function ResumenView({ compras }: Props) {
               {ranking.map((r, i) => (
                 <tr
                   key={r.tipo}
-                  className="border-b border-[#1e2d45]/40 hover:bg-white/[0.015] transition-colors duration-100"
+                  className="border-b border-[var(--border)]/40 hover:bg-[var(--bg-surface)] transition-colors duration-100"
                 >
-                  <td className="py-2.5 pr-4 text-[#4d6480] tabular-nums">{i + 1}</td>
-                  <td className="py-2.5 pr-4 text-[#e8edf5] font-500">
+                  <td className="py-2.5 pr-4 text-[var(--text-muted)] tabular-nums">{i + 1}</td>
+                  <td className="py-2.5 pr-4 text-[var(--text-primary)] font-500">
                     <div className="flex items-center gap-1.5">
                       <span
                         className="w-1.5 h-1.5 rounded-full flex-shrink-0"
@@ -328,8 +328,8 @@ export default function ResumenView({ compras }: Props) {
                   <td className="py-2.5 pr-4 min-w-[140px]">
                     <BarProgress pct={r.pctTotal} />
                   </td>
-                  <td className="py-2.5 pr-4 text-[#8fa3be] tabular-nums text-center">{r.nOrdenes}</td>
-                  <td className="py-2.5 pr-0 text-[#8fa3be] max-w-[200px] truncate" title={r.insumoTop}>
+                  <td className="py-2.5 pr-4 text-[var(--text-secondary)] tabular-nums text-center">{r.nOrdenes}</td>
+                  <td className="py-2.5 pr-0 text-[var(--text-secondary)] max-w-[200px] truncate" title={r.insumoTop}>
                     {r.insumoTop}
                   </td>
                 </tr>
@@ -345,36 +345,36 @@ export default function ResumenView({ compras }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full text-[12px] border-collapse">
             <thead>
-              <tr className="border-b border-[#1e2d45]">
-                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[#4d6480]">Fecha</th>
-                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[#4d6480]">OC</th>
-                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[#4d6480]">ID Ins.</th>
-                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[#4d6480]">Descripción</th>
-                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[#4d6480] hidden md:table-cell">Tipo</th>
-                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[#4d6480]">Proveedor</th>
-                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[#4d6480] hidden lg:table-cell">Empresa</th>
-                <th className="pb-2.5 pr-0 text-right text-[10px] font-500 uppercase tracking-wider text-[#4d6480]">Importe s/IVA</th>
+              <tr className="border-b border-[var(--border)]">
+                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[var(--text-muted)]">Fecha</th>
+                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[var(--text-muted)]">OC</th>
+                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[var(--text-muted)]">ID Ins.</th>
+                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[var(--text-muted)]">Descripción</th>
+                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[var(--text-muted)] hidden md:table-cell">Tipo</th>
+                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[var(--text-muted)]">Proveedor</th>
+                <th className="pb-2.5 pr-3 text-left text-[10px] font-500 uppercase tracking-wider text-[var(--text-muted)] hidden lg:table-cell">Empresa</th>
+                <th className="pb-2.5 pr-0 text-right text-[10px] font-500 uppercase tracking-wider text-[var(--text-muted)]">Importe s/IVA</th>
               </tr>
             </thead>
             <tbody>
               {ultimas.map((c, i) => (
                 <tr
                   key={`${c.ordenCompra}-${c.insumo}-${i}`}
-                  className="border-b border-[#1e2d45]/40 hover:bg-white/[0.015] transition-colors duration-100"
+                  className="border-b border-[var(--border)]/40 hover:bg-[var(--bg-surface)] transition-colors duration-100"
                 >
-                  <td className="py-2 pr-3 text-[#8fa3be] whitespace-nowrap">{fmtFecha(c.fecha)}</td>
-                  <td className="py-2 pr-3 text-[#8fa3be] font-mono">{c.ordenCompra}</td>
-                  <td className="py-2 pr-3 text-[#4d6480] font-mono tabular-nums">{c.insumo}</td>
-                  <td className="py-2 pr-3 text-[#e8edf5] max-w-[180px] truncate" title={c.descripcion}>
+                  <td className="py-2 pr-3 text-[var(--text-secondary)] whitespace-nowrap">{fmtFecha(c.fecha)}</td>
+                  <td className="py-2 pr-3 text-[var(--text-secondary)] font-mono">{c.ordenCompra}</td>
+                  <td className="py-2 pr-3 text-[var(--text-muted)] font-mono tabular-nums">{c.insumo}</td>
+                  <td className="py-2 pr-3 text-[var(--text-primary)] max-w-[180px] truncate" title={c.descripcion}>
                     {c.descripcion}
                   </td>
-                  <td className="py-2 pr-3 text-[#4d6480] max-w-[110px] truncate hidden md:table-cell" title={c.tipoInsumo}>
+                  <td className="py-2 pr-3 text-[var(--text-muted)] max-w-[110px] truncate hidden md:table-cell" title={c.tipoInsumo}>
                     {c.tipoInsumo}
                   </td>
-                  <td className="py-2 pr-3 text-[#8fa3be] max-w-[130px] truncate" title={c.proveedor}>
+                  <td className="py-2 pr-3 text-[var(--text-secondary)] max-w-[130px] truncate" title={c.proveedor}>
                     {c.proveedor}
                   </td>
-                  <td className="py-2 pr-3 text-[#8fa3be] whitespace-nowrap hidden lg:table-cell">{c.empresa}</td>
+                  <td className="py-2 pr-3 text-[var(--text-secondary)] whitespace-nowrap hidden lg:table-cell">{c.empresa}</td>
                   <td className="py-2 pr-0 text-amber-400 font-600 text-right tabular-nums whitespace-nowrap">
                     {fmt$(c.importe)}
                   </td>

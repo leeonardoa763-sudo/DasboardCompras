@@ -11,6 +11,7 @@ export interface FiltrosActivos {
   compradores: string[]
   centros: number[]
   tiposInsumo: string[]
+  proveedores: string[]
   fechaDesde: string
   fechaHasta: string
 }
@@ -20,6 +21,7 @@ export interface FilterOptions {
   compradores: string[]
   centros: number[]
   tiposInsumo: string[]
+  proveedores: string[]
 }
 
 export const FILTROS_VACÍOS: FiltrosActivos = {
@@ -27,6 +29,7 @@ export const FILTROS_VACÍOS: FiltrosActivos = {
   compradores: [],
   centros: [],
   tiposInsumo: [],
+  proveedores: [],
   fechaDesde: '',
   fechaHasta: '',
 }

@@ -110,7 +110,8 @@ export function competenciaPreciosProveedores(compras: Compra[]): CompetenciaPre
   >()
 
   for (const c of compras) {
-    const ins = insumoMap.get(c.insumoClave) ?? {
+    const key = String(c.insumo)
+    const ins = insumoMap.get(key) ?? {
       descripcion: c.descripcion,
       tipoInsumo: c.tipoInsumo,
       unidad: c.unidad,
@@ -121,12 +122,12 @@ export function competenciaPreciosProveedores(compras: Compra[]): CompetenciaPre
     prov.importe += c.importe
     prov.nCompras++
     ins.porProveedor.set(c.proveedor, prov)
-    insumoMap.set(c.insumoClave, ins)
+    insumoMap.set(key, ins)
   }
 
   const result: CompetenciaPrecio[] = []
 
-  for (const [insumoClave, ins] of insumoMap.entries()) {
+  for (const [insumoId, ins] of insumoMap.entries()) {
     if (ins.porProveedor.size < 2) continue
 
     const proveedores: ProveedorPrecio[] = [...ins.porProveedor.entries()].map(
@@ -149,7 +150,7 @@ export function competenciaPreciosProveedores(compras: Compra[]): CompetenciaPre
     const gastoTotal = proveedores.reduce((s, p) => s + p.importe, 0)
 
     result.push({
-      insumoClave,
+      insumoClave: insumoId,
       descripcion: ins.descripcion,
       tipoInsumo: ins.tipoInsumo,
       unidad: ins.unidad,
@@ -224,6 +225,89 @@ export function rankingCompradores(compras: Compra[]): ResumenComprador[] {
       pctAhorro: (r.importe + r.ahorro) > 0 ? r.ahorro / (r.importe + r.ahorro) : 0,
     }))
     .sort((a, b) => b.importe - a.importe)
+}
+
+// ── Desglose de ahorro ────────────────────────────────────────────────────────
+
+export interface AhorroPorTipo {
+  tipoInsumo: string
+  ahorro: number
+  importe: number
+  nCompras: number
+  pctAhorro: number   // ahorro / (importe + ahorro)
+  pctDelTotal: number // ahorro de este tipo / ahorro total del periodo
+}
+
+export interface AhorroPorInsumo {
+  insumoClave: string
+  descripcion: string
+  tipoInsumo: string
+  unidad: string
+  ahorro: number
+  importe: number
+  nCompras: number
+  pctAhorro: number
+  pctDelTotal: number
+}
+
+export function ahorroDesglose(compras: Compra[]): {
+  porTipo: AhorroPorTipo[]
+  porInsumo: AhorroPorInsumo[]
+} {
+  const tipoMap = new Map<string, { ahorro: number; importe: number; nCompras: number }>()
+  const insumoMap = new Map<string, {
+    descripcion: string; tipoInsumo: string; unidad: string
+    ahorro: number; importe: number; nCompras: number
+  }>()
+
+  for (const c of compras) {
+    const t = tipoMap.get(c.tipoInsumo) ?? { ahorro: 0, importe: 0, nCompras: 0 }
+    t.ahorro += c.ahorro
+    t.importe += c.importe
+    t.nCompras++
+    tipoMap.set(c.tipoInsumo, t)
+
+    const key = String(c.insumo)
+    const ins = insumoMap.get(key) ?? {
+      descripcion: c.descripcion, tipoInsumo: c.tipoInsumo, unidad: c.unidad,
+      ahorro: 0, importe: 0, nCompras: 0,
+    }
+    ins.ahorro += c.ahorro
+    ins.importe += c.importe
+    ins.nCompras++
+    insumoMap.set(key, ins)
+  }
+
+  const ahorroTotal = [...tipoMap.values()].reduce((s, v) => s + v.ahorro, 0)
+
+  const porTipo = [...tipoMap.entries()]
+    .filter(([, v]) => v.ahorro > 0)
+    .map(([tipoInsumo, v]) => ({
+      tipoInsumo,
+      ahorro: v.ahorro,
+      importe: v.importe,
+      nCompras: v.nCompras,
+      pctAhorro: (v.importe + v.ahorro) > 0 ? v.ahorro / (v.importe + v.ahorro) : 0,
+      pctDelTotal: ahorroTotal > 0 ? v.ahorro / ahorroTotal : 0,
+    }))
+    .sort((a, b) => b.ahorro - a.ahorro)
+
+  const porInsumo = [...insumoMap.entries()]
+    .filter(([, v]) => v.ahorro > 0)
+    .map(([insumoClave, v]) => ({
+      insumoClave,
+      descripcion: v.descripcion,
+      tipoInsumo: v.tipoInsumo,
+      unidad: v.unidad,
+      ahorro: v.ahorro,
+      importe: v.importe,
+      nCompras: v.nCompras,
+      pctAhorro: (v.importe + v.ahorro) > 0 ? v.ahorro / (v.importe + v.ahorro) : 0,
+      pctDelTotal: ahorroTotal > 0 ? v.ahorro / ahorroTotal : 0,
+    }))
+    .sort((a, b) => b.ahorro - a.ahorro)
+
+  return { porTipo, porInsumo }
 }
 
 // ── Centros de costo ──────────────────────────────────────────────────────────
