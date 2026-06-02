@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Test-Path \"d:\\\\Documents\\\\1.DASBOARD COMPRAS\\\\src\\\\analytics\\\\reports.ts\")",
+      "Bash(npm run *)",
+      "Read(//c/Users/PC/AppData/Local/Temp/**)",
+      "Bash(find /tmp -name \"fase8*\")"
+    ]
+  }
+}
