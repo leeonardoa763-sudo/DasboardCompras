@@ -8,8 +8,11 @@ export interface PuntoPrecio {
   precioUnitario: number
   cantidad: number
   importe: number
+  unidad: string
   empresa: string
   proveedor: string
+  comprador: string
+  centroCostos: number
   ordenCompra: number
 }
 
@@ -38,10 +41,10 @@ export interface ResumenInsumo {
   cantidadTotal: number
 }
 
-/** Devuelve los puntos de precio ordenados por fecha para un insumoClave dado. */
+/** Devuelve los puntos de precio ordenados por fecha para un id de insumo dado. */
 export function seriePrecios(compras: Compra[], insumoClave: string): PuntoPrecio[] {
   const filtradas = compras
-    .filter((c) => c.insumoClave === insumoClave && c.precioUnitario > 0)
+    .filter((c) => String(c.insumo) === insumoClave && c.precioUnitario > 0)
     .sort((a, b) => a.fecha.getTime() - b.fecha.getTime())
 
   if (filtradas.length === 0) return []
@@ -58,8 +61,11 @@ export function seriePrecios(compras: Compra[], insumoClave: string): PuntoPreci
     precioUnitario: c.precioUnitario,
     cantidad: c.cantidad,
     importe: c.importe,
+    unidad: c.unidad,
     empresa: c.empresa,
     proveedor: c.proveedor,
+    comprador: c.comprador,
+    centroCostos: c.centroCostos,
     ordenCompra: c.ordenCompra,
   }))
 }
@@ -94,17 +100,27 @@ export function calcularIndiceBase100(puntos: PuntoPrecio[]): number[] {
   return puntos.map((p) => (p.precioUnitario / base) * 100)
 }
 
-function clasificarTendencia(
-  puntos: PuntoPrecio[],
-  pendiente: number
-): ResumenInsumo['tendencia'] {
-  if (puntos.length < 2) return 'sin_datos'
-  const prom = puntos.reduce((s, p) => s + p.precioUnitario, 0) / puntos.length
-  if (prom === 0) return 'estable'
-  const pctDia = pendiente / prom
-  if (pctDia > 0.001) return 'sube'
-  if (pctDia < -0.001) return 'baja'
-  return 'estable'
+/**
+ * Heurística O(n) para la tabla resumen: compara precio de la primera vs última
+ * compra (cronológicamente). Evita correr regresión lineal en todos los insumos
+ * al cargar — la regresión completa solo se corre cuando el usuario abre el detalle.
+ */
+function tendenciaRapida(
+  sorted: Compra[]
+): { tendencia: ResumenInsumo['tendencia']; pendiente: number } {
+  if (sorted.length < 2) return { tendencia: 'sin_datos', pendiente: 0 }
+  const diasTotal =
+    (sorted[sorted.length - 1].fecha.getTime() - sorted[0].fecha.getTime()) / 86_400_000
+  if (diasTotal < 1) return { tendencia: 'estable', pendiente: 0 }
+  const p0 = sorted[0].precioUnitario
+  const pN = sorted[sorted.length - 1].precioUnitario
+  const prom = sorted.reduce((s, c) => s + c.precioUnitario, 0) / sorted.length
+  const pendiente = (pN - p0) / diasTotal
+  const pctDia = prom > 0 ? pendiente / prom : 0
+  return {
+    tendencia: pctDia > 0.001 ? 'sube' : pctDia < -0.001 ? 'baja' : 'estable',
+    pendiente,
+  }
 }
 
 /** Construye la tabla resumen de todos los insumos presentes en las compras. */
@@ -112,27 +128,21 @@ export function resumenPreciosTodos(compras: Compra[]): ResumenInsumo[] {
   const map = new Map<string, Compra[]>()
   for (const c of compras) {
     if (c.precioUnitario <= 0) continue
-    const arr = map.get(c.insumoClave) ?? []
+    const key = String(c.insumo)
+    const arr = map.get(key) ?? []
     arr.push(c)
-    map.set(c.insumoClave, arr)
+    map.set(key, arr)
   }
 
   return [...map.entries()]
     .map(([insumoClave, rows]) => {
-      const puntos = seriePrecios(rows, insumoClave)
+      const sorted = rows.slice().sort((a, b) => a.fecha.getTime() - b.fecha.getTime())
       const precios = rows.map((c) => c.precioUnitario)
       const puMin = Math.min(...precios)
       const puMax = Math.max(...precios)
       const puPromedio = precios.reduce((s, p) => s + p, 0) / precios.length
       const stdDev = precios.length > 1 ? ss.standardDeviation(precios) : 0
-      const reg = calcularRegresion(puntos)
-      const pendiente = reg?.pendiente ?? 0
-      const r2 = reg?.r2 ?? 0
-      const tendencia = clasificarTendencia(puntos, pendiente)
-      const ultimaFecha = rows.reduce(
-        (max, c) => (c.fecha > max ? c.fecha : max),
-        rows[0].fecha
-      )
+      const { tendencia, pendiente } = tendenciaRapida(sorted)
       const gastoTotal = rows.reduce((s, c) => s + c.importe, 0)
       const cantidadTotal = rows.reduce((s, c) => s + c.cantidad, 0)
 
@@ -148,8 +158,8 @@ export function resumenPreciosTodos(compras: Compra[]): ResumenInsumo[] {
         stdDev,
         tendencia,
         pendiente,
-        r2,
-        ultimaFecha,
+        r2: 0,
+        ultimaFecha: sorted[sorted.length - 1].fecha,
         gastoTotal,
         cantidadTotal,
       }

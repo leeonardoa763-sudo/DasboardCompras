@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { useTheme } from '../../contexts/ThemeContext'
 
 interface HeaderProps {
   onToggleSidebar: () => void
@@ -19,6 +20,7 @@ function formatFecha(date: Date): string {
 
 export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarArchivo, onPresentar }: HeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { theme, toggleTheme } = useTheme()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -29,12 +31,12 @@ export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarA
   }
 
   return (
-    <header className="h-14 flex items-center justify-between px-4 md:px-6 bg-[#0a0f1c] border-b border-[#1e2d45] flex-shrink-0">
+    <header className="h-14 flex items-center justify-between px-4 md:px-6 bg-[var(--bg-base)] border-b border-[var(--border)] flex-shrink-0">
       {/* Izquierda: hamburger (solo móvil) + título */}
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleSidebar}
-          className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-[#8fa3be] hover:bg-[#141c2e] hover:text-[#e8edf5] transition-colors duration-150"
+          className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-card)] hover:text-[var(--text-primary)] transition-colors duration-150"
           aria-label="Abrir menú"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -45,14 +47,14 @@ export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarA
         </button>
 
         <div className="flex items-center gap-2">
-          <h1 className="text-[14px] font-600 text-[#e8edf5] tracking-tight hidden md:block">
+          <h1 className="text-[14px] font-600 text-[var(--text-primary)] tracking-tight hidden md:block">
             Dashboard de Compras
           </h1>
-          <h1 className="text-[14px] font-600 text-[#e8edf5] tracking-tight md:hidden">
+          <h1 className="text-[14px] font-600 text-[var(--text-primary)] tracking-tight md:hidden">
             Compras
           </h1>
           {ultimaActualizacion && (
-            <span className="hidden lg:inline-flex items-center gap-1.5 text-[11px] text-[#4d6480] bg-[#141c2e] border border-[#1e2d45] rounded-full px-2.5 py-0.5">
+            <span className="hidden lg:inline-flex items-center gap-1.5 text-[11px] text-[var(--text-muted)] bg-[var(--bg-card)] border border-[var(--border)] rounded-full px-2.5 py-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
               Actualizado {formatFecha(ultimaActualizacion)}
             </span>
@@ -63,17 +65,42 @@ export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarA
       {/* Derecha: fecha (móvil/tablet) + acciones */}
       <div className="flex items-center gap-2">
         {ultimaActualizacion && (
-          <span className="lg:hidden flex items-center gap-1.5 text-[11px] text-[#4d6480]">
+          <span className="lg:hidden flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
             <span className="hidden sm:inline">{formatFecha(ultimaActualizacion)}</span>
           </span>
         )}
 
+        {/* Botón tema claro/oscuro */}
+        <button
+          onClick={toggleTheme}
+          className="flex items-center justify-center w-8 h-8 rounded-lg text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--color-subtle)] hover:text-[var(--text-primary)] transition-all duration-150"
+          title={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+        >
+          {theme === 'dark' ? (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="7" cy="7" r="3" />
+              <line x1="7" y1="1" x2="7" y2="2.2" />
+              <line x1="7" y1="11.8" x2="7" y2="13" />
+              <line x1="1" y1="7" x2="2.2" y2="7" />
+              <line x1="11.8" y1="7" x2="13" y2="7" />
+              <line x1="2.8" y1="2.8" x2="3.7" y2="3.7" />
+              <line x1="10.3" y1="10.3" x2="11.2" y2="11.2" />
+              <line x1="11.2" y1="2.8" x2="10.3" y2="3.7" />
+              <line x1="3.7" y1="10.3" x2="2.8" y2="11.2" />
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11.5 8.5A5 5 0 0 1 5.5 2.5a5 5 0 1 0 6 6z" />
+            </svg>
+          )}
+        </button>
+
         {/* Botón Presentar */}
         {onPresentar && (
           <button
             onClick={onPresentar}
-            className="hidden sm:flex items-center gap-2 h-8 px-3 rounded-lg text-[12px] font-500 text-[#8fa3be] bg-[#141c2e] border border-[#1e2d45] hover:border-amber-500/40 hover:text-amber-400 transition-all duration-150"
+            className="hidden sm:flex items-center gap-2 h-8 px-3 rounded-lg text-[12px] font-500 text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border)] hover:border-amber-500/40 hover:text-amber-400 transition-all duration-150"
             title="Modo presentación a pantalla completa"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
@@ -87,7 +114,7 @@ export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarA
 
         {/* Botón Google Sheets */}
         <button
-          className="hidden sm:flex items-center gap-2 h-8 px-3 rounded-lg text-[12px] font-500 text-[#8fa3be] bg-[#141c2e] border border-[#1e2d45] hover:border-[#2a3f58] hover:text-[#e8edf5] transition-all duration-150"
+          className="hidden sm:flex items-center gap-2 h-8 px-3 rounded-lg text-[12px] font-500 text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--color-subtle)] hover:text-[var(--text-primary)] transition-all duration-150"
           title="Conectar Google Sheets (próximamente)"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">

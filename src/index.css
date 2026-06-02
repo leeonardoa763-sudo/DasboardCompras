@@ -11,6 +11,7 @@
   --bg-card-hover: #1a2438;
   --border: #1e2d45;
   --border-subtle: #162033;
+  --color-subtle: #2a3f58;
   --accent-amber: #f59e0b;
   --accent-amber-light: #fbbf24;
   --accent-amber-dim: rgba(245, 158, 11, 0.12);
@@ -22,6 +23,43 @@
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
+  /* KPI accent colors */
+  --kpi-amber: #f59e0b;
+  --kpi-blue: #60a5fa;
+  --kpi-green: #34d399;
+  --kpi-purple: #a78bfa;
+  /* Reporte header gradient */
+  --report-hdr-from: #0d1626;
+  --report-hdr-to: #141c2e;
+}
+
+html.light {
+  --bg-base: #f0f4f8;
+  --bg-surface: #e4eaf2;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --border: #c8d5e6;
+  --border-subtle: #dde5ef;
+  --color-subtle: #94a3b8;
+  --accent-amber: #d97706;
+  --accent-amber-light: #f59e0b;
+  --accent-amber-dim: rgba(217, 119, 6, 0.10);
+  --accent-blue: #2563eb;
+  --accent-blue-dim: rgba(37, 99, 235, 0.10);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  /* KPI accent colors — más oscuros para contrastar con fondo claro */
+  --kpi-amber: #b45309;
+  --kpi-blue: #1d4ed8;
+  --kpi-green: #047857;
+  --kpi-purple: #6d28d9;
+  /* Reporte header gradient */
+  --report-hdr-from: #e8eef8;
+  --report-hdr-to: #f0f5fb;
 }
 
 *,
@@ -61,6 +99,13 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+input[type="date"] {
+  color-scheme: dark;
+}
+html.light input[type="date"] {
+  color-scheme: light;
 }
 
 /* Selección de texto */

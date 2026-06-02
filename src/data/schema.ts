@@ -31,9 +31,9 @@ export interface Compra {
  */
 export const HEADERS: Record<string, keyof Compra> = {
   'Empresa':              'empresa',
-  'CENTRO DE COSTOS':     'centroCostos',
-  'ODEN DE COMPRA':       'ordenCompra',      // errata intencional
-  'Fecha de compra':      'fecha',
+  'CC':                   'centroCostos',     // abreviación real: "CENTRO DE COSTOS"
+  'OC':                   'ordenCompra',      // abreviación real: "ODEN DE COMPRA"
+  'Fecha':                'fecha',            // abreviación real: "Fecha de compra"
   'id Proveedor':         'idProveedor',
   'Proveedor':            'proveedor',
   'Insumo':               'insumo',

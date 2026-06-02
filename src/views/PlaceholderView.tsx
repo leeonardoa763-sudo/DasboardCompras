@@ -27,8 +27,8 @@ export default function PlaceholderView({ icon, titulo, descripcion, color, fase
         <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl ${c.bg} ${c.text} mb-6`}>
           {icon}
         </div>
-        <h2 className="text-[22px] font-600 text-[#e8edf5] mb-2 tracking-tight">{titulo}</h2>
-        <p className="text-[13px] text-[#8fa3be] leading-relaxed mb-6">{descripcion}</p>
+        <h2 className="text-[22px] font-600 text-[var(--text-primary)] mb-2 tracking-tight">{titulo}</h2>
+        <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-6">{descripcion}</p>
         <span className={`inline-flex items-center gap-1.5 text-[11px] font-500 px-3 py-1.5 rounded-full border ${c.badge}`}>
           <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
           En construcción — {fase}

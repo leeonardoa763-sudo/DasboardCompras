@@ -102,13 +102,54 @@ function normalizeRow(
 
 // ── Punto de entrada público ─────────────────────────────────────────
 
+/**
+ * Construye un mapa de clave-normalizada → clave-original para tolerar
+ * diferencias de mayúsculas/minúsculas y espacios en los encabezados del Excel.
+ */
+function buildKeyMap(raw: RawRow): Map<string, string> {
+  const map = new Map<string, string>()
+  for (const key of Object.keys(raw)) {
+    map.set(key.trim().toLowerCase(), key)
+  }
+  return map
+}
+
+function remapRow(raw: RawRow): RawRow {
+  const keyMap = buildKeyMap(raw)
+  const remapped: RawRow = {}
+
+  for (const [excelKey] of Object.entries(HEADERS)) {
+    const normalizedExpected = excelKey.trim().toLowerCase()
+    const actualKey = keyMap.get(normalizedExpected)
+    if (actualKey !== undefined) {
+      remapped[excelKey] = raw[actualKey]
+    }
+  }
+  return remapped
+}
+
 export function normalizeRows(rows: RawRow[]): ParseResult {
   const compras: Compra[] = []
   const advertencias: string[] = []
 
+  // Detectar encabezados faltantes usando la primera fila
+  if (rows.length > 0) {
+    const keyMap = buildKeyMap(rows[0])
+    const faltantes = Object.keys(HEADERS).filter(
+      (h) => !keyMap.has(h.trim().toLowerCase()),
+    )
+    if (faltantes.length > 0) {
+      advertencias.push(
+        `Encabezados no encontrados en el Excel: ${faltantes.join(', ')}. ` +
+        `Encabezados reales: ${Object.keys(rows[0]).join(', ')}`,
+      )
+    }
+  }
+
   for (let i = 0; i < rows.length; i++) {
     try {
-      const compra = normalizeRow(rows[i], i + 2, advertencias)
+      const remapped = remapRow(rows[i])
+      const compra = normalizeRow(remapped, i + 2, advertencias)
       if (compra) compras.push(compra)
     } catch (err) {
       advertencias.push(`Fila ${i + 2}: error inesperado — ${err}`)

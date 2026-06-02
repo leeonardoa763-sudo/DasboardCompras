@@ -76,12 +76,12 @@ export default function PresentacionMode({ activeView, onNavigate, onExit, child
     <div
       ref={containerRef}
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: '#080c14', fontFamily: '"DM Sans", system-ui, sans-serif' }}
+      style={{ background: 'var(--bg-base)', fontFamily: '"DM Sans", system-ui, sans-serif' }}
     >
       {/* ── Header de presentación ── */}
       <div
         className="h-12 flex-shrink-0 flex items-center justify-between px-5"
-        style={{ background: '#0a0f1c', borderBottom: '1px solid #1e2d45' }}
+        style={{ background: 'var(--bg-base)', borderBottom: '1px solid #1e2d45' }}
       >
         {/* Logo + título del slide */}
         <div className="flex items-center gap-3">
@@ -95,10 +95,10 @@ export default function PresentacionMode({ activeView, onNavigate, onExit, child
               <rect x="11" y="1" width="3" height="13" rx="0.5" />
             </svg>
           </div>
-          <span className="text-[13px] font-semibold" style={{ color: '#e8edf5' }}>
+          <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
             Dashboard de Compras
           </span>
-          <span style={{ color: '#2a3f58' }}>·</span>
+          <span style={{ color: 'var(--color-subtle)' }}>·</span>
           <span className="text-[13px] font-medium" style={{ color: '#f59e0b' }}>
             {VIEW_LABELS[activeView]}
           </span>
@@ -117,7 +117,7 @@ export default function PresentacionMode({ activeView, onNavigate, onExit, child
                   height: '6px',
                   width: i === currentIndex ? '20px' : '6px',
                   borderRadius: '3px',
-                  background: i === currentIndex ? '#f59e0b' : '#2a3f58',
+                  background: i === currentIndex ? '#f59e0b' : 'var(--color-subtle)',
                   border: 'none',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
@@ -126,7 +126,7 @@ export default function PresentacionMode({ activeView, onNavigate, onExit, child
             ))}
           </div>
 
-          <span className="text-[11px] tabular-nums" style={{ color: '#4d6480' }}>
+          <span className="text-[11px] tabular-nums" style={{ color: 'var(--text-muted)' }}>
             {currentIndex + 1} / {VIEW_ORDER.length}
           </span>
 
@@ -139,17 +139,17 @@ export default function PresentacionMode({ activeView, onNavigate, onExit, child
               padding: '0 10px',
               borderRadius: '6px',
               border: '1px solid #1e2d45',
-              color: '#8fa3be',
+              color: 'var(--text-secondary)',
               background: 'transparent',
               cursor: 'pointer',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#2a3f58'
-              e.currentTarget.style.color = '#e8edf5'
+              e.currentTarget.style.borderColor = 'var(--color-subtle)'
+              e.currentTarget.style.color = 'var(--text-primary)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#1e2d45'
-              e.currentTarget.style.color = '#8fa3be'
+              e.currentTarget.style.borderColor = 'var(--border)'
+              e.currentTarget.style.color = 'var(--text-secondary)'
             }}
           >
             <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -226,13 +226,13 @@ function NavArrow({
         justifyContent: 'center',
         background: 'transparent',
         border: 'none',
-        color: disabled ? 'transparent' : '#4d6480',
+        color: disabled ? 'transparent' : 'var(--text-muted)',
         cursor: disabled ? 'default' : 'pointer',
         transition: 'color 0.15s ease',
         pointerEvents: disabled ? 'none' : 'auto',
       }}
-      onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.color = '#e8edf5' }}
-      onMouseLeave={(e) => { if (!disabled) e.currentTarget.style.color = '#4d6480' }}
+      onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.color = 'var(--text-primary)' }}
+      onMouseLeave={(e) => { if (!disabled) e.currentTarget.style.color = 'var(--text-muted)' }}
     >
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         {direction === 'left'
@@ -246,15 +246,15 @@ function NavArrow({
 
 function HelpHint({ icon, children }: { icon: string; children: string }) {
   return (
-    <span className="flex items-center gap-1.5 text-[10px]" style={{ color: '#2a3f58' }}>
+    <span className="flex items-center gap-1.5 text-[10px]" style={{ color: 'var(--color-subtle)' }}>
       <span
         className="text-[9px] font-mono"
         style={{
           padding: '1px 5px',
           borderRadius: '3px',
-          background: '#0e1420',
+          background: 'var(--bg-surface)',
           border: '1px solid #1e2d45',
-          color: '#4d6480',
+          color: 'var(--text-muted)',
         }}
       >
         {icon}

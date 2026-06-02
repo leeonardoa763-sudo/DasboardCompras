@@ -53,13 +53,22 @@ export interface FilaDetalleReporte {
   ahorro: number
 }
 
+export interface PuntoDia {
+  label: string
+  importe: number
+  acumulado: number
+  nOrdenes: number
+}
+
 export interface Reporte {
   periodo: PeriodoReporte
   kpis: KPIPeriodo
   variacion: VariacionPeriodo | null
+  topTipos: TopFila[]
   topInsumos: TopFila[]
   topProveedores: TopFila[]
   topCompradores: TopFila[]
+  gastoEnTiempo: PuntoDia[]
   compras: FilaDetalleReporte[]
 }
 
@@ -162,6 +171,13 @@ export function generarReporte(compras: Compra[], periodo: PeriodoReporte): Repo
     }
   }
 
+  // Top por tipo de insumo (categoría)
+  const tipoMap = new Map<string, number>()
+  for (const c of del) tipoMap.set(c.tipoInsumo, (tipoMap.get(c.tipoInsumo) ?? 0) + c.importe)
+  const topTipos: TopFila[] = [...tipoMap.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([nombre, importe]) => ({ nombre, importe, pctTotal: kpis.gasto > 0 ? importe / kpis.gasto : 0 }))
+
   // Top insumos
   const insumoMap = new Map<string, number>()
   for (const c of del) insumoMap.set(c.descripcion, (insumoMap.get(c.descripcion) ?? 0) + c.importe)
@@ -196,6 +212,30 @@ export function generarReporte(compras: Compra[], periodo: PeriodoReporte): Repo
       extra: `Ahorro ${fmt$(r.ahorro)}`,
     }))
 
+  // Gasto por día (para la gráfica de tiempo)
+  const diaMap = new Map<string, { importe: number; ordenes: Set<number> }>()
+  const DIAS_SEM = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+  for (const c of del) {
+    const key = periodo.tipo === 'mes'
+      ? String(c.fecha.getDate()).padStart(2, '0')
+      : DIAS_SEM[c.fecha.getDay()]
+    const r = diaMap.get(key) ?? { importe: 0, ordenes: new Set<number>() }
+    r.importe += c.importe
+    r.ordenes.add(c.ordenCompra)
+    diaMap.set(key, r)
+  }
+  const entradasDia = periodo.tipo === 'mes'
+    ? [...diaMap.entries()].sort((a, b) => Number(a[0]) - Number(b[0]))
+    : [...diaMap.entries()].sort((a, b) => {
+        const ord = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+        return ord.indexOf(a[0]) - ord.indexOf(b[0])
+      })
+  let acum = 0
+  const gastoEnTiempo: PuntoDia[] = entradasDia.map(([label, r]) => {
+    acum += r.importe
+    return { label, importe: r.importe, acumulado: acum, nOrdenes: r.ordenes.size }
+  })
+
   // Detalle de líneas ordenadas por fecha desc
   const comprasDetalle: FilaDetalleReporte[] = del
     .slice()
@@ -215,7 +255,7 @@ export function generarReporte(compras: Compra[], periodo: PeriodoReporte): Repo
       ahorro: c.ahorro,
     }))
 
-  return { periodo, kpis, variacion, topInsumos, topProveedores, topCompradores, compras: comprasDetalle }
+  return { periodo, kpis, variacion, topTipos, topInsumos, topProveedores, topCompradores, gastoEnTiempo, compras: comprasDetalle }
 }
 
 // Helper de formato monetario sin importar utils (evita dependencia circular en reportes puros)

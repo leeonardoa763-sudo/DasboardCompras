@@ -87,7 +87,7 @@ export default function App() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="w-8 h-8 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-[13px] text-[#4d6480]">Cargando datos…</p>
+            <p className="text-[13px] text-[var(--text-muted)]">Cargando datos…</p>
           </div>
         </div>
       )}

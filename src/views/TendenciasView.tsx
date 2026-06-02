@@ -26,7 +26,7 @@ function InfoTooltip({ text }: { text: string }) {
     <span className="relative inline-flex items-center ml-1.5 flex-shrink-0">
       <button
         onClick={() => setOpen(!open)}
-        className="w-[15px] h-[15px] rounded-full bg-[#1e2d45] border border-[#2a3f58] text-[#4d6480] hover:text-white hover:bg-blue-600/60 hover:border-blue-500/50 text-[8px] font-700 flex items-center justify-center transition-all focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+        className="w-[15px] h-[15px] rounded-full bg-[var(--border)] border border-[var(--color-subtle)] text-[var(--text-muted)] hover:text-white hover:bg-blue-600/60 hover:border-blue-500/50 text-[8px] font-700 flex items-center justify-center transition-all focus:outline-none focus:ring-1 focus:ring-blue-500/50"
         aria-label="Más información"
       >
         ?
@@ -34,8 +34,8 @@ function InfoTooltip({ text }: { text: string }) {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-5 z-50 w-64 bg-[#1a2438] border border-[#2a3f58] rounded-xl p-3 shadow-2xl">
-            <p className="text-[11px] text-[#8fa3be] leading-relaxed">{text}</p>
+          <div className="absolute left-0 top-5 z-50 w-64 bg-[var(--bg-card-hover)] border border-[var(--color-subtle)] rounded-xl p-3 shadow-2xl">
+            <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">{text}</p>
             <button
               onClick={() => setOpen(false)}
               className="mt-2 text-[9px] text-blue-400 hover:text-blue-300 font-500"
@@ -51,7 +51,7 @@ function InfoTooltip({ text }: { text: string }) {
 
 function SectionLabel({ children, info }: { children: React.ReactNode; info?: string }) {
   return (
-    <h2 className="text-[10px] font-600 uppercase tracking-widest text-[#4d6480] mb-3 flex items-center">
+    <h2 className="text-[10px] font-600 uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center">
       {children}
       {info && <InfoTooltip text={info} />}
     </h2>
@@ -65,8 +65,8 @@ function TooltipGasto({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   const d = payload[0].payload as PuntoTendencia
   return (
-    <div className="bg-[#1a2438] border border-[#1e2d45] rounded-lg px-3 py-2 shadow-xl text-left">
-      {label && <p className="text-[10px] text-[#4d6480] mb-1">{label}</p>}
+    <div className="bg-[var(--bg-card-hover)] border border-[var(--border)] rounded-lg px-3 py-2 shadow-xl text-left">
+      {label && <p className="text-[10px] text-[var(--text-muted)] mb-1">{label}</p>}
       <p className="text-[13px] font-600 text-blue-400">{fmt$(d.importe)}</p>
       {d.mediaMovil !== null && (
         <p className="text-[11px] text-amber-400 mt-0.5">Media móvil: {fmt$(d.mediaMovil)}</p>
@@ -80,9 +80,9 @@ function TooltipDelta({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   const d = payload[0].payload as PuntoTendencia
   return (
-    <div className="bg-[#1a2438] border border-[#1e2d45] rounded-lg px-3 py-2 shadow-xl text-left">
-      {label && <p className="text-[10px] text-[#4d6480] mb-1">{label}</p>}
-      <p className="text-[13px] font-600 text-[#e8edf5]">{fmt$(d.importe)}</p>
+    <div className="bg-[var(--bg-card-hover)] border border-[var(--border)] rounded-lg px-3 py-2 shadow-xl text-left">
+      {label && <p className="text-[10px] text-[var(--text-muted)] mb-1">{label}</p>}
+      <p className="text-[13px] font-600 text-[var(--text-primary)]">{fmt$(d.importe)}</p>
       <p className={`text-[11px] mt-0.5 font-500 ${d.delta > 0 ? 'text-amber-400' : 'text-blue-400'}`}>
         {d.delta > 0 ? '+' : ''}{fmt$(d.delta)} ({d.deltaPct > 0 ? '+' : ''}{fmtPct(d.deltaPct)})
       </p>
@@ -94,8 +94,8 @@ function TooltipDelta({ active, payload, label }: any) {
 function TooltipAcumulado({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-[#1a2438] border border-[#1e2d45] rounded-lg px-3 py-2 shadow-xl text-left">
-      {label && <p className="text-[10px] text-[#4d6480] mb-1">{label}</p>}
+    <div className="bg-[var(--bg-card-hover)] border border-[var(--border)] rounded-lg px-3 py-2 shadow-xl text-left">
+      {label && <p className="text-[10px] text-[var(--text-muted)] mb-1">{label}</p>}
       <p className="text-[13px] font-600 text-emerald-400">{fmt$(payload[0].value as number)}</p>
     </div>
   )
@@ -105,7 +105,7 @@ function TooltipAcumulado({ active, payload, label }: any) {
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-[#141c2e] border border-[#1e2d45] rounded-xl p-4 ${className}`}>
+    <div className={`bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-4 ${className}`}>
       {children}
     </div>
   )
@@ -114,12 +114,12 @@ function Card({ children, className = '' }: { children: React.ReactNode; classNa
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3">
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#4d6480" strokeWidth="1.2" strokeLinecap="round">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="var(--text-muted)" strokeWidth="1.2" strokeLinecap="round">
         <circle cx="20" cy="20" r="16" />
         <line x1="20" y1="12" x2="20" y2="20" />
-        <circle cx="20" cy="27" r="1" fill="#4d6480" stroke="none" />
+        <circle cx="20" cy="27" r="1" fill="var(--text-muted)" stroke="none" />
       </svg>
-      <p className="text-[13px] text-[#4d6480]">Sin datos para los filtros seleccionados</p>
+      <p className="text-[13px] text-[var(--text-muted)]">Sin datos para los filtros seleccionados</p>
     </div>
   )
 }
@@ -171,13 +171,13 @@ export default function TendenciasView({ compras }: Props) {
             className={`px-4 py-1.5 rounded-full text-[12px] font-500 transition-colors ${
               granularidad === g
                 ? 'bg-blue-600/80 text-white border border-blue-500/50'
-                : 'bg-[#141c2e] border border-[#1e2d45] text-[#8fa3be] hover:text-white hover:border-[#2a3f58]'
+                : 'bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-white hover:border-[var(--color-subtle)]'
             }`}
           >
             {g === 'mes' ? 'Por mes' : 'Por semana'}
           </button>
         ))}
-        <span className="text-[11px] text-[#4d6480]">
+        <span className="text-[11px] text-[var(--text-muted)]">
           {serie.length} {labelPeriodos}
         </span>
       </div>
@@ -186,7 +186,7 @@ export default function TendenciasView({ compras }: Props) {
       {comp ? (
         <div className="space-y-2">
           <div className="flex items-center">
-            <span className="text-[10px] font-600 uppercase tracking-widest text-[#4d6480]">
+            <span className="text-[10px] font-600 uppercase tracking-widest text-[var(--text-muted)]">
               Comparativa de periodos
             </span>
             <InfoTooltip text={HELP.kpis} />
@@ -236,12 +236,12 @@ export default function TendenciasView({ compras }: Props) {
               </defs>
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 10, fill: '#4d6480' }}
+                tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                 tickLine={false}
-                axisLine={{ stroke: '#1e2d45' }}
+                axisLine={{ stroke: 'var(--border)' }}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: '#4d6480' }}
+                tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                 tickFormatter={fmtYAxis}
                 tickLine={false}
                 axisLine={false}
@@ -257,8 +257,8 @@ export default function TendenciasView({ compras }: Props) {
                 stroke="#3b82f6"
                 strokeWidth={2}
                 fill="url(#gradTend)"
-                dot={{ r: 3, fill: '#3b82f6', stroke: '#080c14', strokeWidth: 2 }}
-                activeDot={{ r: 5, fill: '#3b82f6', stroke: '#080c14', strokeWidth: 2 }}
+                dot={{ r: 3, fill: '#3b82f6', stroke: 'var(--bg-base)', strokeWidth: 2 }}
+                activeDot={{ r: 5, fill: '#3b82f6', stroke: 'var(--bg-base)', strokeWidth: 2 }}
               />
               <Line
                 type="monotone"
@@ -274,13 +274,13 @@ export default function TendenciasView({ compras }: Props) {
           <div className="flex items-center gap-5 mt-2 flex-wrap">
             <div className="flex items-center gap-1.5">
               <div className="w-4 h-0.5 bg-blue-500 rounded" />
-              <span className="text-[10px] text-[#4d6480]">Gasto del periodo</span>
+              <span className="text-[10px] text-[var(--text-muted)]">Gasto del periodo</span>
             </div>
             <div className="flex items-center gap-1.5">
               <svg width="16" height="4" viewBox="0 0 16 4">
                 <line x1="0" y1="2" x2="16" y2="2" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="5 3" />
               </svg>
-              <span className="text-[10px] text-[#4d6480]">Media móvil (3 periodos)</span>
+              <span className="text-[10px] text-[var(--text-muted)]">Media móvil (3 periodos)</span>
               <InfoTooltip text={HELP.mediaMovilLeyenda} />
             </div>
           </div>
@@ -300,31 +300,31 @@ export default function TendenciasView({ compras }: Props) {
             >
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 10, fill: '#4d6480' }}
+                tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                 tickLine={false}
-                axisLine={{ stroke: '#1e2d45' }}
+                axisLine={{ stroke: 'var(--border)' }}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: '#4d6480' }}
+                tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                 tickFormatter={(v: number) => `${(v * 100).toFixed(0)}%`}
                 tickLine={false}
                 axisLine={false}
                 width={40}
               />
               <Tooltip content={<TooltipDelta />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-              <ReferenceLine y={0} stroke="#1e2d45" strokeWidth={1} />
+              <ReferenceLine y={0} stroke="var(--border)" strokeWidth={1} />
               <Bar dataKey="deltaPct" maxBarSize={36}>
                 {serie.slice(1).map((p, i) => (
                   <Cell
                     key={i}
-                    fill={p.deltaPct > 0 ? '#f59e0b' : p.deltaPct < 0 ? '#3b82f6' : '#2a3f58'}
+                    fill={p.deltaPct > 0 ? '#f59e0b' : p.deltaPct < 0 ? '#3b82f6' : 'var(--color-subtle)'}
                     fillOpacity={0.85}
                   />
                 ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-          <p className="text-[10px] text-[#4d6480] mt-1.5 flex items-center gap-4 flex-wrap">
+          <p className="text-[10px] text-[var(--text-muted)] mt-1.5 flex items-center gap-4 flex-wrap">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-sm inline-block bg-amber-500/80" />
               Gasto subió vs periodo anterior
@@ -353,12 +353,12 @@ export default function TendenciasView({ compras }: Props) {
               </defs>
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 10, fill: '#4d6480' }}
+                tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                 tickLine={false}
-                axisLine={{ stroke: '#1e2d45' }}
+                axisLine={{ stroke: 'var(--border)' }}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: '#4d6480' }}
+                tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                 tickFormatter={fmtYAxis}
                 tickLine={false}
                 axisLine={false}
@@ -375,7 +375,7 @@ export default function TendenciasView({ compras }: Props) {
                 strokeWidth={2}
                 fill="url(#gradAcum)"
                 dot={false}
-                activeDot={{ r: 4, fill: '#10b981', stroke: '#080c14', strokeWidth: 2 }}
+                activeDot={{ r: 4, fill: '#10b981', stroke: 'var(--bg-base)', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -390,11 +390,11 @@ export default function TendenciasView({ compras }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full text-[12px] border-collapse">
             <thead>
-              <tr className="border-b border-[#1e2d45]">
+              <tr className="border-b border-[var(--border)]">
                 {['Periodo', 'Gasto sin IVA', 'Gasto + IVA', 'Δ vs anterior', 'Δ%', 'Acumulado', 'Media móvil'].map((h) => (
                   <th
                     key={h}
-                    className="pb-2.5 pr-4 last:pr-0 text-left text-[10px] font-500 uppercase tracking-wider text-[#4d6480]"
+                    className="pb-2.5 pr-4 last:pr-0 text-left text-[10px] font-500 uppercase tracking-wider text-[var(--text-muted)]"
                   >
                     {h}
                   </th>
@@ -405,18 +405,18 @@ export default function TendenciasView({ compras }: Props) {
               {[...serie].reverse().map((p) => (
                 <tr
                   key={p.sortKey}
-                  className="border-b border-[#1e2d45]/40 hover:bg-white/[0.015] transition-colors duration-100"
+                  className="border-b border-[var(--border)]/40 hover:bg-[var(--bg-surface)] transition-colors duration-100"
                 >
-                  <td className="py-2.5 pr-4 text-[#e8edf5] font-500 whitespace-nowrap">{p.label}</td>
+                  <td className="py-2.5 pr-4 text-[var(--text-primary)] font-500 whitespace-nowrap">{p.label}</td>
                   <td className="py-2.5 pr-4 text-amber-400 font-600 tabular-nums whitespace-nowrap">{fmt$(p.importe)}</td>
-                  <td className="py-2.5 pr-4 text-[#8fa3be] tabular-nums whitespace-nowrap">{fmt$(p.totalConIva)}</td>
+                  <td className="py-2.5 pr-4 text-[var(--text-secondary)] tabular-nums whitespace-nowrap">{fmt$(p.totalConIva)}</td>
                   <td className={`py-2.5 pr-4 tabular-nums whitespace-nowrap font-500 ${
-                    p.delta > 0 ? 'text-amber-400' : p.delta < 0 ? 'text-blue-400' : 'text-[#4d6480]'
+                    p.delta > 0 ? 'text-amber-400' : p.delta < 0 ? 'text-blue-400' : 'text-[var(--text-muted)]'
                   }`}>
                     {p.delta !== 0 ? (p.delta > 0 ? '+' : '') + fmt$(p.delta) : '—'}
                   </td>
                   <td className={`py-2.5 pr-4 tabular-nums whitespace-nowrap ${
-                    p.deltaPct > 0 ? 'text-amber-400' : p.deltaPct < 0 ? 'text-blue-400' : 'text-[#4d6480]'
+                    p.deltaPct > 0 ? 'text-amber-400' : p.deltaPct < 0 ? 'text-blue-400' : 'text-[var(--text-muted)]'
                   }`}>
                     {p.delta !== 0 ? (
                       <span className="flex items-center gap-0.5">
@@ -425,8 +425,8 @@ export default function TendenciasView({ compras }: Props) {
                       </span>
                     ) : '—'}
                   </td>
-                  <td className="py-2.5 pr-4 text-[#e8edf5] tabular-nums whitespace-nowrap">{fmt$(p.acumulado)}</td>
-                  <td className="py-2.5 pr-0 text-[#8fa3be] tabular-nums whitespace-nowrap">
+                  <td className="py-2.5 pr-4 text-[var(--text-primary)] tabular-nums whitespace-nowrap">{fmt$(p.acumulado)}</td>
+                  <td className="py-2.5 pr-0 text-[var(--text-secondary)] tabular-nums whitespace-nowrap">
                     {p.mediaMovil !== null ? fmt$(p.mediaMovil) : '—'}
                   </td>
                 </tr>
