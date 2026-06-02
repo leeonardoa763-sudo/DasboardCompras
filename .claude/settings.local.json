@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Select-Object FullName)",
+      "Bash(git init *)",
+      "Bash(git add *)"
+    ]
+  }
+}
