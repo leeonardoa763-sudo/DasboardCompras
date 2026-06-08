@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { cargarEjemplo, cargarDesdeArchivo } from './data/loadExcel'
+import { cargarDesdeGoogleSheets } from './data/loadSheet'
 import type { ParseResult } from './data/schema'
 import type { Compra } from './data/schema'
 import type { ViewId, FiltrosActivos } from './components/layout/types'
@@ -55,6 +56,19 @@ export default function App() {
     setCargando(true)
     setError(null)
     cargarDesdeArchivo(file)
+      .then((r) => {
+        setResult(r)
+        setUltimaActualizacion(new Date())
+        setFiltros(FILTROS_VACÍOS)
+      })
+      .catch((e: unknown) => setError(String(e)))
+      .finally(() => setCargando(false))
+  }
+
+  const handleCargarGoogleSheets = (csvUrl: string) => {
+    setCargando(true)
+    setError(null)
+    cargarDesdeGoogleSheets(csvUrl)
       .then((r) => {
         setResult(r)
         setUltimaActualizacion(new Date())
@@ -141,6 +155,7 @@ export default function App() {
       onLimpiarFiltros={() => setFiltros(FILTROS_VACÍOS)}
       ultimaActualizacion={ultimaActualizacion}
       onCargarArchivo={handleCargarArchivo}
+      onCargarGoogleSheets={handleCargarGoogleSheets}
       activeView={activeView}
       onNavigate={setActiveView}
       onPresentar={() => setModoPresent(true)}

@@ -5,6 +5,7 @@ interface HeaderProps {
   onToggleSidebar: () => void
   ultimaActualizacion: Date | null
   onCargarArchivo: (file: File) => void
+  onCargarGoogleSheets: (csvUrl: string) => void
   onPresentar?: () => void
 }
 
@@ -18,7 +19,7 @@ function formatFecha(date: Date): string {
   })
 }
 
-export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarArchivo, onPresentar }: HeaderProps) {
+export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarArchivo, onCargarGoogleSheets, onPresentar }: HeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { theme, toggleTheme } = useTheme()
 
@@ -27,6 +28,15 @@ export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarA
     if (file) {
       onCargarArchivo(file)
       e.target.value = ''
+    }
+  }
+
+  const handleGoogleSheetsClick = () => {
+    const csvUrl = window.prompt(
+      'Pega la URL pública de Google Sheets en formato CSV:\nEjemplo: https://docs.google.com/spreadsheets/d/ID/export?format=csv&gid=0'
+    )
+    if (csvUrl) {
+      onCargarGoogleSheets(csvUrl.trim())
     }
   }
 
@@ -114,8 +124,9 @@ export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarA
 
         {/* Botón Google Sheets */}
         <button
+          onClick={handleGoogleSheetsClick}
           className="hidden sm:flex items-center gap-2 h-8 px-3 rounded-lg text-[12px] font-500 text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--color-subtle)] hover:text-[var(--text-primary)] transition-all duration-150"
-          title="Conectar Google Sheets (próximamente)"
+          title="Conectar Google Sheets"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
             <rect x="1" y="2" width="12" height="10" rx="1" />
