@@ -72,9 +72,10 @@ interface SidebarProps {
   onNavigate: (view: ViewId) => void
   isOpen: boolean
   onClose: () => void
+  vistasPermitidas: ViewId[]
 }
 
-export default function Sidebar({ activeView, onNavigate, isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ activeView, onNavigate, isOpen, onClose, vistasPermitidas }: SidebarProps) {
   const handleNav = (view: ViewId) => {
     onNavigate(view)
     onClose()
@@ -121,7 +122,7 @@ export default function Sidebar({ activeView, onNavigate, isOpen, onClose }: Sid
             Módulos
           </p>
           <ul className="space-y-0.5 px-2">
-            {NAV_ITEMS.map((item) => {
+            {NAV_ITEMS.filter((item) => vistasPermitidas.includes(item.id)).map((item) => {
               const active = activeView === item.id
               return (
                 <li key={item.id}>
@@ -147,6 +148,11 @@ export default function Sidebar({ activeView, onNavigate, isOpen, onClose }: Sid
               )
             })}
           </ul>
+          {NAV_ITEMS.filter((item) => vistasPermitidas.includes(item.id)).length === 0 && (
+            <div className="px-5 py-4 text-[12px] text-[var(--text-muted)] bg-[var(--bg-card)] rounded-2xl">
+              No tienes vistas disponibles.
+            </div>
+          )}
         </nav>
 
         {/* Footer */}

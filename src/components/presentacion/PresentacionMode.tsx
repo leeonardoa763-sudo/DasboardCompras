@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 import type { ViewId } from '../layout/types'
 
@@ -17,14 +17,19 @@ const VIEW_ORDER: ViewId[] = [
 
 interface Props {
   activeView: ViewId
+  allowedViews: ViewId[]
   onNavigate: (v: ViewId) => void
   onExit: () => void
   children: ReactNode
 }
 
-export default function PresentacionMode({ activeView, onNavigate, onExit, children }: Props) {
+export default function PresentacionMode({ activeView, allowedViews, onNavigate, onExit, children }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const currentIndex = VIEW_ORDER.indexOf(activeView)
+  const orderedViews = useMemo(
+    () => VIEW_ORDER.filter((view) => allowedViews.includes(view)),
+    [allowedViews],
+  )
+  const currentIndex = orderedViews.indexOf(activeView)
 
   // Ir a fullscreen al montar
   useEffect(() => {
@@ -53,16 +58,16 @@ export default function PresentacionMode({ activeView, onNavigate, onExit, child
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
         e.preventDefault()
-        if (currentIndex < VIEW_ORDER.length - 1) onNavigate(VIEW_ORDER[currentIndex + 1])
+        if (currentIndex < orderedViews.length - 1) onNavigate(orderedViews[currentIndex + 1])
       }
       if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
         e.preventDefault()
-        if (currentIndex > 0) onNavigate(VIEW_ORDER[currentIndex - 1])
+        if (currentIndex > 0) onNavigate(orderedViews[currentIndex - 1])
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [currentIndex, onNavigate])
+  }, [currentIndex, onNavigate, orderedViews])
 
   const handleExit = () => {
     if (document.fullscreenElement) {
@@ -70,6 +75,10 @@ export default function PresentacionMode({ activeView, onNavigate, onExit, child
     } else {
       onExit()
     }
+  }
+
+  if (orderedViews.length === 0 || currentIndex === -1) {
+    return null
   }
 
   return (
@@ -108,7 +117,7 @@ export default function PresentacionMode({ activeView, onNavigate, onExit, child
         <div className="flex items-center gap-4">
           {/* Dots de progreso */}
           <div className="flex items-center gap-1.5">
-            {VIEW_ORDER.map((v, i) => (
+            {orderedViews.map((v, i) => (
               <button
                 key={v}
                 onClick={() => onNavigate(v)}
