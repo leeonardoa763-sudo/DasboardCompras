@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Compra } from '../../data/schema'
+import type { Usuario } from '../../auth/auth'
 import type { FilterOptions, FiltrosActivos, ViewId } from './types'
 import Sidebar from './Sidebar'
 import Header from './Header'
@@ -13,10 +14,13 @@ interface LayoutProps {
   onLimpiarFiltros: () => void
   ultimaActualizacion: Date | null
   onCargarArchivo: (file: File) => void
-  onCargarGoogleSheets: (csvUrl: string) => void
+  onCargarGoogleSheets: (sheetUrl: string, sheetName?: string) => void
   activeView: ViewId
   onNavigate: (view: ViewId) => void
   onPresentar?: () => void
+  usuario: Usuario | null
+  onLogout: () => void
+  vistasPermitidas: ViewId[]
   children: ReactNode
 }
 
@@ -40,6 +44,9 @@ export default function Layout({
   activeView,
   onNavigate,
   onPresentar,
+  usuario,
+  onLogout,
+  vistasPermitidas,
   children,
 }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -52,6 +59,7 @@ export default function Layout({
         onNavigate={onNavigate}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        vistasPermitidas={vistasPermitidas}
       />
 
       <div className="flex-1 flex flex-col min-w-0 md:ml-60">
@@ -61,6 +69,8 @@ export default function Layout({
           onCargarArchivo={onCargarArchivo}
           onCargarGoogleSheets={onCargarGoogleSheets}
           onPresentar={onPresentar}
+          usuario={usuario}
+          onLogout={onLogout}
         />
         <FilterBar
           opciones={opciones}

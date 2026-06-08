@@ -3,10 +3,13 @@ import { cargarEjemplo, cargarDesdeArchivo } from './data/loadExcel'
 import { cargarDesdeGoogleSheets } from './data/loadSheet'
 import type { ParseResult } from './data/schema'
 import type { Compra } from './data/schema'
+import type { Usuario } from './auth/auth'
+import { cargarSesion, guardarSesion, VISTAS_POR_ROLE } from './auth/auth'
 import type { ViewId, FiltrosActivos } from './components/layout/types'
 import { FILTROS_VACÍOS } from './components/layout/types'
 import Layout from './components/layout/Layout'
 import PresentacionMode from './components/presentacion/PresentacionMode'
+import AuthGate from './components/auth/AuthGate'
 import ResumenView from './views/ResumenView'
 import TendenciasView from './views/TendenciasView'
 import PreciosView from './views/PreciosView'
@@ -41,8 +44,25 @@ export default function App() {
   const [ultimaActualizacion, setUltimaActualizacion] = useState<Date | null>(null)
   const [filtros, setFiltros] = useState<FiltrosActivos>(FILTROS_VACÍOS)
   const [modoPresent, setModoPresent] = useState(false)
+  const [usuario, setUsuario] = useState<Usuario | null>(null)
+
+  const vistasPermitidas = useMemo(
+    () => (usuario ? VISTAS_POR_ROLE[usuario.role] : []),
+    [usuario],
+  )
 
   useEffect(() => {
+    if (usuario && vistasPermitidas.length > 0 && !vistasPermitidas.includes(activeView)) {
+      setActiveView(vistasPermitidas[0])
+    }
+  }, [usuario, vistasPermitidas, activeView])
+
+  useEffect(() => {
+    const sesion = cargarSesion()
+    if (sesion) {
+      setUsuario(sesion)
+    }
+
     cargarEjemplo()
       .then((r) => {
         setResult(r)
@@ -65,10 +85,10 @@ export default function App() {
       .finally(() => setCargando(false))
   }
 
-  const handleCargarGoogleSheets = (csvUrl: string) => {
+  const handleCargarGoogleSheets = (sheetUrl: string, sheetName?: string) => {
     setCargando(true)
     setError(null)
-    cargarDesdeGoogleSheets(csvUrl)
+    cargarDesdeGoogleSheets(sheetUrl, sheetName)
       .then((r) => {
         setResult(r)
         setUltimaActualizacion(new Date())
@@ -135,10 +155,22 @@ export default function App() {
     </>
   )
 
+  if (!usuario) {
+    return (
+      <AuthGate
+        onLogin={(u) => {
+          setUsuario(u)
+          guardarSesion(u)
+        }}
+      />
+    )
+  }
+
   if (modoPresent) {
     return (
       <PresentacionMode
         activeView={activeView}
+        allowedViews={vistasPermitidas}
         onNavigate={setActiveView}
         onExit={() => setModoPresent(false)}
       >
@@ -159,6 +191,12 @@ export default function App() {
       activeView={activeView}
       onNavigate={setActiveView}
       onPresentar={() => setModoPresent(true)}
+      usuario={usuario}
+      onLogout={() => {
+        guardarSesion(null)
+        setUsuario(null)
+      }}
+      vistasPermitidas={vistasPermitidas}
     >
       {content}
     </Layout>

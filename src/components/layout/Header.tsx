@@ -1,12 +1,15 @@
 import { useRef } from 'react'
+import type { Usuario } from '../../auth/auth'
 import { useTheme } from '../../contexts/ThemeContext'
 
 interface HeaderProps {
   onToggleSidebar: () => void
   ultimaActualizacion: Date | null
   onCargarArchivo: (file: File) => void
-  onCargarGoogleSheets: (csvUrl: string) => void
+  onCargarGoogleSheets: (sheetUrl: string, sheetName?: string) => void
   onPresentar?: () => void
+  usuario: Usuario | null
+  onLogout: () => void
 }
 
 function formatFecha(date: Date): string {
@@ -19,7 +22,7 @@ function formatFecha(date: Date): string {
   })
 }
 
-export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarArchivo, onCargarGoogleSheets, onPresentar }: HeaderProps) {
+export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarArchivo, onCargarGoogleSheets, onPresentar, usuario, onLogout }: HeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { theme, toggleTheme } = useTheme()
 
@@ -32,12 +35,16 @@ export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarA
   }
 
   const handleGoogleSheetsClick = () => {
-    const csvUrl = window.prompt(
-      'Pega la URL pública de Google Sheets en formato CSV:\nEjemplo: https://docs.google.com/spreadsheets/d/ID/export?format=csv&gid=0'
+    const sheetUrl = window.prompt(
+      'Pega la URL pública de Google Sheets o el enlace normal de la hoja:\nEjemplo: https://docs.google.com/spreadsheets/d/ID/edit#gid=0'
     )
-    if (csvUrl) {
-      onCargarGoogleSheets(csvUrl.trim())
-    }
+    if (!sheetUrl) return
+
+    const sheetName = window.prompt(
+      'Si tu hoja correcta no es la primera pestaña, escribe el nombre exacto de la hoja aquí.\nEjemplo: RegistroCompras\nDeja vacío si el enlace ya abre la hoja correcta.'
+    )
+
+    onCargarGoogleSheets(sheetUrl.trim(), sheetName?.trim() || undefined)
   }
 
   return (
@@ -119,6 +126,20 @@ export default function Header({ onToggleSidebar, ultimaActualizacion, onCargarA
               <line x1="7" y1="11" x2="7" y2="13" />
             </svg>
             Presentar
+          </button>
+        )}
+
+        {usuario && (
+          <button
+            onClick={onLogout}
+            className="hidden sm:flex items-center gap-2 h-8 px-3 rounded-lg text-[12px] font-500 text-red-400 bg-[var(--bg-card)] border border-[var(--border)] hover:border-red-300 hover:text-red-300 transition-all duration-150"
+            title="Cerrar sesión"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 3l3.5 3.5L9 10" />
+              <path d="M2 7h10" />
+            </svg>
+            Cerrar sesión
           </button>
         )}
 

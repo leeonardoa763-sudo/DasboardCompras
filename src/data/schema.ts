@@ -60,3 +60,18 @@ export interface ParseResult {
   compras: Compra[]
   advertencias: string[]
 }
+
+export const HEADER_ALIASES: Record<string, string> = {
+  'fecha de compra': 'Fecha',
+  'fecha compra': 'Fecha',
+  'orden de compra': 'OC',
+  'oden de compra': 'OC',
+  'codigo comprador': 'Codigo Comprador',
+  'código comprador': 'Codigo Comprador',
+  'codigo de ahorro': 'Codigo de ahorro',
+  'código de ahorro': 'Codigo de ahorro',
+  'tipo de insumo': 'Tipo De Insumo',
+  'total + iva': 'Total + IVA',
+  '% de ahorro': '%de Ahrro',
+  '% de ahrro': '%de Ahrro',
+}

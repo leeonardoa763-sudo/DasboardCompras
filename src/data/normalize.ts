@@ -1,4 +1,4 @@
-import { HEADERS } from './schema'
+import { HEADERS, HEADER_ALIASES } from './schema'
 import type { Compra, ParseResult } from './schema'
 
 type RawRow = Record<string, unknown>
@@ -16,6 +16,26 @@ function toNum(v: unknown): number | null {
   return isFinite(n) ? n : null
 }
 
+function normalizeKey(key: string): string {
+  return key.trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+function parseDateString(value: string): Date | null {
+  const text = value.trim()
+  if (!text) return null
+
+  const parsed = new Date(text)
+  if (!isNaN(parsed.getTime())) return parsed
+
+  const match = text.match(/^\s*(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?\s*$/)
+  if (!match) return null
+
+  const [, day, month, yearRaw, hours = '0', minutes = '0', seconds = '0'] = match
+  const year = yearRaw.length === 2 ? Number(yearRaw) + (Number(yearRaw) > 50 ? 1900 : 2000) : Number(yearRaw)
+  const date = new Date(year, Number(month) - 1, Number(day), Number(hours), Number(minutes), Number(seconds))
+  return isNaN(date.getTime()) ? null : date
+}
+
 function toDate(v: unknown): Date | null {
   if (v == null) return null
   if (v instanceof Date) return isNaN(v.getTime()) ? null : v
@@ -26,8 +46,7 @@ function toDate(v: unknown): Date | null {
     return isNaN(date.getTime()) ? null : date
   }
   if (typeof v === 'string') {
-    const d = new Date(v)
-    return isNaN(d.getTime()) ? null : d
+    return parseDateString(v)
   }
   return null
 }
@@ -109,22 +128,28 @@ function normalizeRow(
 function buildKeyMap(raw: RawRow): Map<string, string> {
   const map = new Map<string, string>()
   for (const key of Object.keys(raw)) {
-    map.set(key.trim().toLowerCase(), key)
+    map.set(normalizeKey(key), key)
   }
   return map
 }
 
+function resolveHeaderName(header: string): string {
+  const normalized = normalizeKey(header)
+  const alias = HEADER_ALIASES[normalized]
+  if (alias) return alias
+  return Object.keys(HEADERS).find((key) => normalizeKey(key) === normalized) ?? header
+}
+
 function remapRow(raw: RawRow): RawRow {
-  const keyMap = buildKeyMap(raw)
   const remapped: RawRow = {}
 
-  for (const [excelKey] of Object.entries(HEADERS)) {
-    const normalizedExpected = excelKey.trim().toLowerCase()
-    const actualKey = keyMap.get(normalizedExpected)
-    if (actualKey !== undefined) {
-      remapped[excelKey] = raw[actualKey]
+  for (const actualKey of Object.keys(raw)) {
+    const targetKey = resolveHeaderName(actualKey)
+    if (targetKey in HEADERS) {
+      remapped[targetKey] = raw[actualKey]
     }
   }
+
   return remapped
 }
 
@@ -135,9 +160,13 @@ export function normalizeRows(rows: RawRow[]): ParseResult {
   // Detectar encabezados faltantes usando la primera fila
   if (rows.length > 0) {
     const keyMap = buildKeyMap(rows[0])
-    const faltantes = Object.keys(HEADERS).filter(
-      (h) => !keyMap.has(h.trim().toLowerCase()),
-    )
+    const faltantes = Object.keys(HEADERS).filter((expectedHeader) => {
+      if (keyMap.has(normalizeKey(expectedHeader))) return false
+      const aliasKeys = Object.entries(HEADER_ALIASES)
+        .filter(([, canonical]) => canonical === expectedHeader)
+        .map(([alias]) => alias)
+      return !aliasKeys.some((alias) => keyMap.has(alias))
+    })
     if (faltantes.length > 0) {
       advertencias.push(
         `Encabezados no encontrados en el Excel: ${faltantes.join(', ')}. ` +
