@@ -13,6 +13,7 @@ interface LayoutProps {
   onLimpiarFiltros: () => void
   ultimaActualizacion: Date | null
   onCargarArchivo: (file: File) => void
+  onCargarGoogleSheets: (csvUrl: string) => void
   activeView: ViewId
   onNavigate: (view: ViewId) => void
   onPresentar?: () => void
@@ -35,6 +36,7 @@ export default function Layout({
   onLimpiarFiltros,
   ultimaActualizacion,
   onCargarArchivo,
+  onCargarGoogleSheets,
   activeView,
   onNavigate,
   onPresentar,
@@ -57,6 +59,7 @@ export default function Layout({
           onToggleSidebar={() => setSidebarOpen((o) => !o)}
           ultimaActualizacion={ultimaActualizacion}
           onCargarArchivo={onCargarArchivo}
+          onCargarGoogleSheets={onCargarGoogleSheets}
           onPresentar={onPresentar}
         />
         <FilterBar
