@@ -879,7 +879,8 @@ function ComparacionInsumos({
 
 // ── Vista principal ───────────────────────────────────────────────────────────
 
-type SortKey = 'descripcion' | 'puPromedio' | 'puMin' | 'puMax' | 'stdDev' | 'nCompras' | 'gastoTotal' | 'cantidadTotal' | 'tendencia'
+type SortKey = 'descripcion' | 'puPromedio' | 'puMin' | 'puMax' | 'stdDev' | 'nCompras' | 'gastoTotal' | 'cantidadTotal' | 'tendencia' | 'pendiente'
+type QuickFilter = 'todos' | 'recientes' | 'volatil' | 'sube' | 'baja' | 'influyentes'
 
 const PAGE_SIZE = 50
 
@@ -892,6 +893,8 @@ const HELP = {
 
 export default function PreciosView({ compras }: Props) {
   const [busqueda, setBusqueda] = useState('')
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>('todos')
+  const [diasReciente, setDiasReciente] = useState(30)
   const [insumosSeleccionados, setInsumosSeleccionados] = useState<Set<string>>(new Set())
   const [sortKey, setSortKey] = useState<SortKey>('gastoTotal')
   const [sortAsc, setSortAsc] = useState(false)
@@ -908,9 +911,14 @@ export default function PreciosView({ compras }: Props) {
     return map
   }, [resumen])
 
-  const resumenFiltrado = useMemo(() => {
+  const maxFechaMs = useMemo(
+    () => (resumen.length === 0 ? Date.now() : Math.max(...resumen.map((r) => r.ultimaFecha.getTime()))),
+    [resumen]
+  )
+
+  const resumenTexto = useMemo(() => {
     const q = busqueda.toLowerCase()
-    const filtrado = q
+    return q
       ? resumen.filter(
           (r) =>
             r.descripcion.toLowerCase().includes(q) ||
@@ -918,15 +926,55 @@ export default function PreciosView({ compras }: Props) {
             r.insumoClave.toLowerCase().includes(q)
         )
       : resumen
+  }, [resumen, busqueda])
+
+  // Pareto: insumos que acumulan el 80% del gasto total
+  const influyentesInfo = useMemo(() => {
+    const totalGasto = resumenTexto.reduce((s, r) => s + r.gastoTotal, 0)
+    if (totalGasto === 0) return { claves: new Set<string>(), totalGasto: 0 }
+    const sorted = [...resumenTexto].sort((a, b) => b.gastoTotal - a.gastoTotal)
+    let acum = 0
+    const claves = new Set<string>()
+    for (const r of sorted) {
+      acum += r.gastoTotal
+      claves.add(r.insumoClave)
+      if (acum >= totalGasto * 0.8) break
+    }
+    return { claves, totalGasto }
+  }, [resumenTexto])
+
+  const chipCounts = useMemo(() => {
+    const umbral = maxFechaMs - diasReciente * 86_400_000
+    const cv = (r: ResumenInsumo) => (r.puPromedio > 0 ? (r.stdDev / r.puPromedio) * 100 : 0)
+    return {
+      recientes:    resumenTexto.filter((r) => r.ultimaFecha.getTime() >= umbral).length,
+      volatil:      resumenTexto.filter((r) => r.nCompras > 1 && cv(r) > 10).length,
+      sube:         resumenTexto.filter((r) => r.tendencia === 'sube').length,
+      baja:         resumenTexto.filter((r) => r.tendencia === 'baja').length,
+      influyentes:  influyentesInfo.claves.size,
+    }
+  }, [resumenTexto, maxFechaMs, diasReciente, influyentesInfo])
+
+  const resumenFiltrado = useMemo(() => {
+    const umbral = maxFechaMs - diasReciente * 86_400_000
+    const cv = (r: ResumenInsumo) => (r.puPromedio > 0 ? (r.stdDev / r.puPromedio) * 100 : 0)
+    const filtrado = resumenTexto.filter((r) => {
+      if (quickFilter === 'recientes')   return r.ultimaFecha.getTime() >= umbral
+      if (quickFilter === 'volatil')     return r.nCompras > 1 && cv(r) > 10
+      if (quickFilter === 'sube')        return r.tendencia === 'sube'
+      if (quickFilter === 'baja')        return r.tendencia === 'baja'
+      if (quickFilter === 'influyentes') return influyentesInfo.claves.has(r.insumoClave)
+      return true
+    })
 
     return [...filtrado].sort((a, b) => {
       let diff = 0
-      if (sortKey === 'descripcion')  diff = a.descripcion.localeCompare(b.descripcion)
+      if (sortKey === 'descripcion')    diff = a.descripcion.localeCompare(b.descripcion)
       else if (sortKey === 'tendencia') diff = a.tendencia.localeCompare(b.tendencia)
       else diff = (a[sortKey] as number) - (b[sortKey] as number)
       return sortAsc ? diff : -diff
     })
-  }, [resumen, busqueda, sortKey, sortAsc])
+  }, [resumenTexto, quickFilter, diasReciente, maxFechaMs, sortKey, sortAsc, influyentesInfo])
 
   // Puntos de precio para todos los insumos seleccionados
   const puntosMap = useMemo(() => {
@@ -943,7 +991,7 @@ export default function PreciosView({ compras }: Props) {
   const seleccionado = seleccionUnica ? (resumenMap.get(seleccionUnica) ?? null) : null
   const puntosSeleccionado = seleccionUnica ? (puntosMap.get(seleccionUnica) ?? []) : []
 
-  useEffect(() => { setPagina(1) }, [busqueda, sortKey, sortAsc])
+  useEffect(() => { setPagina(1) }, [busqueda, quickFilter, diasReciente, sortKey, sortAsc])
 
   const paginado = resumenFiltrado.slice(0, pagina * PAGE_SIZE)
   const hayMas = resumenFiltrado.length > paginado.length
@@ -962,6 +1010,16 @@ export default function PreciosView({ compras }: Props) {
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortAsc(!sortAsc)
     else { setSortKey(key); setSortAsc(false) }
+  }
+
+  function handleQuickFilter(f: QuickFilter) {
+    setQuickFilter(f)
+    if (f === 'recientes')        { setSortKey('nCompras');   setSortAsc(false) }
+    else if (f === 'volatil')     { setSortKey('stdDev');     setSortAsc(false) }
+    else if (f === 'sube')        { setSortKey('pendiente');  setSortAsc(false) }
+    else if (f === 'baja')        { setSortKey('pendiente');  setSortAsc(true)  }
+    else if (f === 'influyentes') { setSortKey('gastoTotal'); setSortAsc(false) }
+    else                          { setSortKey('gastoTotal'); setSortAsc(false) }
   }
 
   function ThBtn({ col, label }: { col: SortKey; label: string }) {
@@ -999,7 +1057,7 @@ export default function PreciosView({ compras }: Props) {
         </div>
         <span className="text-[11px] text-[var(--text-muted)]">
           {resumenFiltrado.length} insumo{resumenFiltrado.length !== 1 ? 's' : ''}
-          {busqueda && ` de ${resumen.length}`}
+          {(busqueda || quickFilter !== 'todos') && ` de ${resumen.length}`}
         </span>
         {insumosSeleccionados.size > 0 && (
           <div className="flex items-center gap-2">
@@ -1018,6 +1076,76 @@ export default function PreciosView({ compras }: Props) {
           <span className="text-[10px] text-[var(--text-muted)] hidden sm:inline">
             · Clic para seleccionar, clic+shift para comparar varios
           </span>
+        )}
+      </div>
+
+      {/* ── Filtros rápidos ── */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {([
+          { id: 'todos',     label: 'Todos',           count: resumenTexto.length,    color: 'neutral' },
+          { id: 'recientes', label: 'Recientes',        count: chipCounts.recientes,   color: 'blue'    },
+          { id: 'volatil',   label: 'Alta volatilidad', count: chipCounts.volatil,     color: 'amber'   },
+          { id: 'sube',      label: '↑ Precio sube',    count: chipCounts.sube,        color: 'amber'   },
+          { id: 'baja',        label: '↓ Precio baja',    count: chipCounts.baja,        color: 'emerald' },
+          { id: 'influyentes', label: 'Mas influyentes',  count: chipCounts.influyentes, color: 'violet'  },
+        ] as const).map((chip) => {
+          const active = quickFilter === chip.id
+          const cls = {
+            neutral: active
+              ? 'bg-[var(--color-subtle)] text-white border-[var(--color-subtle)]'
+              : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--color-subtle)] hover:text-white',
+            blue: active
+              ? 'bg-blue-600/80 text-white border-blue-500/50'
+              : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-blue-500/40 hover:text-blue-400',
+            amber: active
+              ? 'bg-amber-600/80 text-white border-amber-500/50'
+              : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-amber-500/40 hover:text-amber-400',
+            emerald: active
+              ? 'bg-emerald-600/80 text-white border-emerald-500/50'
+              : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-emerald-500/40 hover:text-emerald-400',
+            violet: active
+              ? 'bg-violet-600/80 text-white border-violet-500/50'
+              : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-violet-500/40 hover:text-violet-400',
+          }[chip.color]
+          return (
+            <button
+              key={chip.id}
+              onClick={() => handleQuickFilter(chip.id)}
+              className={`px-3 py-1 rounded-full text-[11px] font-500 border bg-[var(--bg-surface)] transition-all ${cls}`}
+            >
+              {chip.label}
+              <span className={`ml-1.5 text-[9px] tabular-nums ${active ? 'opacity-80' : 'opacity-50'}`}>
+                {chip.count}
+              </span>
+            </button>
+          )
+        })}
+
+        {quickFilter === 'influyentes' && influyentesInfo.totalGasto > 0 && (
+          <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-[var(--border)]">
+            <span className="text-[10px] text-[var(--text-muted)]">
+              {chipCounts.influyentes} insumos concentran el 80% del gasto total
+            </span>
+          </div>
+        )}
+
+        {quickFilter === 'recientes' && (
+          <div className="flex items-center gap-1 ml-2 pl-2 border-l border-[var(--border)]">
+            <span className="text-[10px] text-[var(--text-muted)] mr-0.5">Últimos:</span>
+            {([7, 30, 60, 90] as const).map((d) => (
+              <button
+                key={d}
+                onClick={() => setDiasReciente(d)}
+                className={`px-2 py-0.5 rounded-full text-[10px] font-500 transition-colors border ${
+                  diasReciente === d
+                    ? 'bg-blue-600/80 text-white border-blue-500/50'
+                    : 'bg-[var(--bg-surface)] border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+                }`}
+              >
+                {d === 7 ? '7d' : d === 30 ? '1m' : d === 60 ? '2m' : '3m'}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
@@ -1109,8 +1237,20 @@ export default function PreciosView({ compras }: Props) {
                         <p className="text-[9px] text-[var(--text-muted)]">{r.unidad}</p>
                       </td>
                       {/* Pu prom */}
-                      <td className="py-2.5 pr-3 text-blue-400 font-600 tabular-nums whitespace-nowrap">
-                        {fmtPu(r.puPromedio)}
+                      <td className="py-2.5 pr-3 tabular-nums whitespace-nowrap">
+                        <span className="text-blue-400 font-600">{fmtPu(r.puPromedio)}</span>
+                        {quickFilter === 'volatil' && r.nCompras > 1 && (
+                          <p className={`text-[9px] font-500 ${
+                            r.ultimoPrecio > r.puPromedio * 1.05
+                              ? 'text-amber-400'
+                              : r.ultimoPrecio < r.puPromedio * 0.95
+                              ? 'text-emerald-400'
+                              : 'text-[var(--text-muted)]'
+                          }`}>
+                            Últ: {fmtPu(r.ultimoPrecio)}
+                            {r.ultimoPrecio > r.puPromedio * 1.05 ? ' ↑' : r.ultimoPrecio < r.puPromedio * 0.95 ? ' ↓' : ''}
+                          </p>
+                        )}
                       </td>
                       {/* Mín */}
                       <td className="py-2.5 pr-3 text-emerald-400/80 tabular-nums whitespace-nowrap text-[11px]">
@@ -1138,14 +1278,26 @@ export default function PreciosView({ compras }: Props) {
                         <TendenciaChip t={r.tendencia} pendiente={r.pendiente} />
                       </td>
                       {/* # Compras */}
-                      <td className="py-2.5 pr-3 text-[var(--text-secondary)] tabular-nums text-center">{r.nCompras}</td>
+                      <td className="py-2.5 pr-3 tabular-nums text-center">
+                        <span className="text-[var(--text-secondary)]">{r.nCompras}</span>
+                        {quickFilter === 'recientes' && (
+                          <p className="text-[9px] text-[var(--text-muted)]">
+                            {r.ultimaFecha.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })}
+                          </p>
+                        )}
+                      </td>
                       {/* Cantidad */}
                       <td className="py-2.5 pr-3 text-[var(--text-secondary)] tabular-nums whitespace-nowrap">
                         {fmtNum(r.cantidadTotal)} <span className="text-[9px] text-[var(--text-muted)]">{r.unidad}</span>
                       </td>
                       {/* Gasto */}
-                      <td className="py-2.5 pr-0 text-amber-400 font-600 tabular-nums whitespace-nowrap">
-                        {fmt$(r.gastoTotal)}
+                      <td className="py-2.5 pr-0 tabular-nums whitespace-nowrap">
+                        <span className="text-amber-400 font-600">{fmt$(r.gastoTotal)}</span>
+                        {quickFilter === 'influyentes' && influyentesInfo.totalGasto > 0 && (
+                          <p className="text-[9px] text-violet-400/80">
+                            {((r.gastoTotal / influyentesInfo.totalGasto) * 100).toFixed(1)}% del total
+                          </p>
+                        )}
                       </td>
                     </tr>
                   )

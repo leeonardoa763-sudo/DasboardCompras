@@ -12,6 +12,7 @@ export interface Compra {
   precioUnitario: number   // Pu, sin IVA
   moneda: string
   importe: number          // sin IVA
+  categoria1: string
   tipoInsumo: string
   notas: string | null
   comprador: string
@@ -43,7 +44,8 @@ export const HEADERS: Record<string, keyof Compra> = {
   'Pu':                   'precioUnitario',
   'Moneda':               'moneda',
   'Importe':              'importe',
-  'Tipo De Insumo':       'tipoInsumo',
+  'Categoria 1':          'categoria1',
+  'Categoria 2':          'tipoInsumo',
   'Notas':                'notas',
   'Comprador':            'comprador',
   '%de Ahrro':            'factorAhorro',     // errata intencional
@@ -70,7 +72,9 @@ export const HEADER_ALIASES: Record<string, string> = {
   'código comprador': 'Codigo Comprador',
   'codigo de ahorro': 'Codigo de ahorro',
   'código de ahorro': 'Codigo de ahorro',
-  'tipo de insumo': 'Tipo De Insumo',
+  'tipo de insumo': 'Categoria 2',
+  'categoria 1':    'Categoria 1',
+  'categoria 2':    'Categoria 2',
   'total + iva': 'Total + IVA',
   '% de ahorro': '%de Ahrro',
   '% de ahrro': '%de Ahrro',

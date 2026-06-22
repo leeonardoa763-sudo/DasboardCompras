@@ -8,19 +8,6 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   {
-    id: 'resumen',
-    label: 'Resumen',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="2" width="6" height="6" rx="1" />
-        <rect x="10" y="2" width="6" height="6" rx="1" />
-        <rect x="2" y="10" width="6" height="6" rx="1" />
-        <rect x="10" y="10" width="6" height="6" rx="1" />
-      </svg>
-    ),
-  },
-  // { id: 'tendencias', label: 'Tendencias', icon: (<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="2,13 6,8 10,11 16,4" /><polyline points="12,4 16,4 16,8" /></svg>) },
-  {
     id: 'precios',
     label: 'Precios',
     icon: (

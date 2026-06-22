@@ -7,7 +7,6 @@ export type Usuario = {
 
 export const VISTAS_POR_ROLE: Record<Usuario["role"], ViewId[]> = {
   admin: [
-    "resumen",
     "tendencias",
     "precios",
     "proveedores",

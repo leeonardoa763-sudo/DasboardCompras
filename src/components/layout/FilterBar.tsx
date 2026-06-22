@@ -13,12 +13,13 @@ const hayFiltrosActivos = (f: FiltrosActivos) =>
   f.empresas.length > 0 ||
   f.compradores.length > 0 ||
   f.centros.length > 0 ||
+  f.categorias1.length > 0 ||
   f.tiposInsumo.length > 0 ||
   f.proveedores.length > 0 ||
   f.fechaDesde !== '' ||
   f.fechaHasta !== ''
 
-// ── Dropdown multi-selección genérico ────────────────────────────────
+// ── Dropdown multi-selección con búsqueda ────────────────────────────
 
 interface MultiDropdownProps<T extends string | number> {
   label: string
@@ -26,6 +27,7 @@ interface MultiDropdownProps<T extends string | number> {
   seleccionados: T[]
   onChange: (nuevos: T[]) => void
   renderLabel?: (v: T) => string
+  placeholder?: string
 }
 
 function MultiDropdown<T extends string | number>({
@@ -34,11 +36,14 @@ function MultiDropdown<T extends string | number>({
   seleccionados,
   onChange,
   renderLabel,
+  placeholder,
 }: MultiDropdownProps<T>) {
   const [open, setOpen] = useState(false)
+  const [busqueda, setBusqueda] = useState('')
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0 })
   const btnRef = useRef<HTMLButtonElement>(null)
   const dropRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -48,6 +53,7 @@ function MultiDropdown<T extends string | number>({
         dropRef.current && !dropRef.current.contains(target)
       ) {
         setOpen(false)
+        setBusqueda('')
       }
     }
     document.addEventListener('mousedown', handler)
@@ -59,8 +65,15 @@ function MultiDropdown<T extends string | number>({
       const r = btnRef.current.getBoundingClientRect()
       setPos({ top: r.bottom + 4, left: r.left, width: r.width })
     }
+    if (open) setBusqueda('')
     setOpen((o) => !o)
   }
+
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 50)
+    }
+  }, [open])
 
   const toggle = (v: T) => {
     if (seleccionados.includes(v)) {
@@ -79,50 +92,84 @@ function MultiDropdown<T extends string | number>({
 
   const active = seleccionados.length > 0
 
+  const opcionesFiltradas = busqueda.trim()
+    ? opciones.filter((v) =>
+        (renderLabel ? renderLabel(v) : String(v))
+          .toLowerCase()
+          .includes(busqueda.toLowerCase()),
+      )
+    : opciones
+
   const dropdown = open ? createPortal(
     <div
       ref={dropRef}
-      style={{ position: 'fixed', top: pos.top, left: pos.left, minWidth: Math.max(pos.width, 160), zIndex: 9999 }}
-      className={[
-        'max-w-[260px] bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg shadow-2xl',
-        'py-1 max-h-64 overflow-y-auto',
-      ].join(' ')}
+      style={{ position: 'fixed', top: pos.top, left: pos.left, minWidth: Math.max(pos.width, 200), zIndex: 9999 }}
+      className="max-w-[280px] bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg shadow-2xl py-1 flex flex-col"
     >
-      {opciones.length === 0 && (
-        <p className="px-3 py-2 text-[11px] text-[var(--text-muted)]">Sin opciones</p>
-      )}
-      {opciones.map((v) => {
-        const checked = seleccionados.includes(v)
-        const txt = renderLabel ? renderLabel(v) : String(v)
-        return (
-          <label
-            key={String(v)}
-            className={[
-              'flex items-center gap-2 px-3 py-1.5 cursor-pointer select-none',
-              'text-[12px] transition-colors duration-100',
-              checked ? 'text-amber-400 bg-amber-500/5' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card)] hover:text-[var(--text-primary)]',
-            ].join(' ')}
-          >
-            <span className={[
-              'w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center flex-shrink-0',
-              checked ? 'bg-amber-500 border-amber-500' : 'border-[var(--color-subtle)] bg-transparent',
-            ].join(' ')}>
-              {checked && (
-                <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="1,4 3,6.5 7,1.5" />
-                </svg>
-              )}
-            </span>
-            <input type="checkbox" className="sr-only" checked={checked} onChange={() => toggle(v)} />
-            <span className="truncate">{txt}</span>
-          </label>
-        )
-      })}
+      {/* Buscador */}
+      <div className="px-2 pt-1 pb-1.5 border-b border-[var(--border)]">
+        <div className="flex items-center gap-1.5 px-2 h-7 rounded-md bg-[var(--bg-card)] border border-[var(--border)]">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-[var(--text-muted)] flex-shrink-0">
+            <circle cx="5" cy="5" r="3.5" />
+            <line x1="8" y1="8" x2="11" y2="11" />
+          </svg>
+          <input
+            ref={inputRef}
+            type="text"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder={placeholder ?? `Buscar ${label.toLowerCase()}…`}
+            className="flex-1 bg-transparent text-[11px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none min-w-0"
+          />
+          {busqueda && (
+            <button onClick={() => setBusqueda('')} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+              <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                <line x1="2" y1="2" x2="8" y2="8" /><line x1="8" y1="2" x2="2" y2="8" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Lista de opciones */}
+      <div className="max-h-52 overflow-y-auto">
+        {opcionesFiltradas.length === 0 && (
+          <p className="px-3 py-2 text-[11px] text-[var(--text-muted)]">Sin resultados</p>
+        )}
+        {opcionesFiltradas.map((v) => {
+          const checked = seleccionados.includes(v)
+          const txt = renderLabel ? renderLabel(v) : String(v)
+          return (
+            <label
+              key={String(v)}
+              className={[
+                'flex items-center gap-2 px-3 py-1.5 cursor-pointer select-none',
+                'text-[12px] transition-colors duration-100',
+                checked ? 'text-amber-400 bg-amber-500/5' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card)] hover:text-[var(--text-primary)]',
+              ].join(' ')}
+            >
+              <span className={[
+                'w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center flex-shrink-0',
+                checked ? 'bg-amber-500 border-amber-500' : 'border-[var(--color-subtle)] bg-transparent',
+              ].join(' ')}>
+                {checked && (
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="1,4 3,6.5 7,1.5" />
+                  </svg>
+                )}
+              </span>
+              <input type="checkbox" className="sr-only" checked={checked} onChange={() => toggle(v)} />
+              <span className="truncate">{txt}</span>
+            </label>
+          )
+        })}
+      </div>
+
       {seleccionados.length > 0 && (
         <>
           <div className="mx-2 my-1 h-px bg-[var(--border)]" />
           <button
-            onClick={() => { onChange([]); setOpen(false) }}
+            onClick={() => { onChange([]); setOpen(false); setBusqueda('') }}
             className="w-full text-left px-3 py-1.5 text-[11px] text-[#ef4444]/70 hover:text-[#ef4444] hover:bg-[#ef4444]/5 transition-colors duration-100"
           >
             Limpiar filtro
@@ -205,7 +252,14 @@ export default function FilterBar({ opciones, filtros, onChange, onLimpiar }: Fi
         />
 
         <MultiDropdown
-          label="Tipo de insumo"
+          label="Categoría 1"
+          opciones={opciones.categorias1}
+          seleccionados={filtros.categorias1}
+          onChange={(v) => onChange({ ...filtros, categorias1: v })}
+        />
+
+        <MultiDropdown
+          label="Categoría 2"
           opciones={opciones.tiposInsumo}
           seleccionados={filtros.tiposInsumo}
           onChange={(v) => onChange({ ...filtros, tiposInsumo: v })}

@@ -27,7 +27,7 @@ export async function cargarDesdeArchivo(file: File): Promise<ParseResult> {
  * Usado como fuente inicial si no se configura Google Sheets.
  */
 export async function cargarEjemplo(): Promise<ParseResult> {
-  const response = await fetch('/data/ejemplo.xlsx')
+  const response = await fetch('/data/Base de datos.xlsx')
   if (!response.ok) {
     return {
       compras: [],

@@ -105,6 +105,7 @@ function normalizeRow(
     precioUnitario,
     moneda:         toStr(mapped.moneda, 'MN'),
     importe,
+    categoria1:     toStr(mapped.categoria1),
     tipoInsumo:     toStr(mapped.tipoInsumo),
     notas:          mapped.notas != null ? toStr(mapped.notas) : null,
     comprador:      toStr(mapped.comprador),

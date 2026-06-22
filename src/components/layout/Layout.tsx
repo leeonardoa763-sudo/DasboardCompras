@@ -28,9 +28,10 @@ function buildFilterOptions(compras: Compra[]): FilterOptions {
   const empresas = [...new Set(compras.map((c) => c.empresa))].sort()
   const compradores = [...new Set(compras.map((c) => c.comprador))].sort()
   const centros = [...new Set(compras.map((c) => c.centroCostos))].sort((a, b) => a - b)
+  const categorias1 = [...new Set(compras.map((c) => c.categoria1).filter(Boolean))].sort()
   const tiposInsumo = [...new Set(compras.map((c) => c.tipoInsumo))].sort()
   const proveedores = [...new Set(compras.map((c) => c.proveedor).filter(Boolean))].sort()
-  return { empresas, compradores, centros, tiposInsumo, proveedores }
+  return { empresas, compradores, centros, categorias1, tiposInsumo, proveedores }
 }
 
 export default function Layout({
