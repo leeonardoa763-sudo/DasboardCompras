@@ -207,6 +207,26 @@ function MultiDropdown<T extends string | number>({
   )
 }
 
+// ── Rangos rápidos ────────────────────────────────────────────────────
+
+function isoDate(d: Date): string {
+  return d.toISOString().slice(0, 10)
+}
+
+function rangoEsteMes() {
+  const hoy = new Date()
+  const desde = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+  const hasta = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0)
+  return { desde: isoDate(desde), hasta: isoDate(hasta) }
+}
+
+function rangoEsteAño() {
+  const hoy = new Date()
+  const desde = new Date(hoy.getFullYear(), 0, 1)
+  const hasta = new Date(hoy.getFullYear(), 11, 31)
+  return { desde: isoDate(desde), hasta: isoDate(hasta) }
+}
+
 // ── FilterBar ─────────────────────────────────────────────────────────
 
 const INPUT_CLASS = [
@@ -271,6 +291,44 @@ export default function FilterBar({ opciones, filtros, onChange, onLimpiar }: Fi
           seleccionados={filtros.proveedores}
           onChange={(v) => onChange({ ...filtros, proveedores: v })}
         />
+
+        <div className="w-px h-4 bg-[var(--border)] flex-shrink-0" />
+
+        {/* Atajos de fecha */}
+        {(() => {
+          const mes = rangoEsteMes()
+          const año = rangoEsteAño()
+          const activoMes = filtros.fechaDesde === mes.desde && filtros.fechaHasta === mes.hasta
+          const activoAño = filtros.fechaDesde === año.desde && filtros.fechaHasta === año.hasta
+          const btnClass = (activo: boolean) => [
+            'flex-shrink-0 h-7 px-2.5 rounded-md text-[12px] font-400 border transition-colors duration-150 cursor-pointer whitespace-nowrap',
+            activo
+              ? 'bg-amber-500/10 border-amber-500/40 text-amber-400'
+              : 'bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--color-subtle)] hover:text-[var(--text-primary)]',
+          ].join(' ')
+          return (
+            <>
+              <button
+                className={btnClass(activoMes)}
+                onClick={() => onChange(activoMes
+                  ? { ...filtros, fechaDesde: '', fechaHasta: '' }
+                  : { ...filtros, fechaDesde: mes.desde, fechaHasta: mes.hasta }
+                )}
+              >
+                Este mes
+              </button>
+              <button
+                className={btnClass(activoAño)}
+                onClick={() => onChange(activoAño
+                  ? { ...filtros, fechaDesde: '', fechaHasta: '' }
+                  : { ...filtros, fechaDesde: año.desde, fechaHasta: año.hasta }
+                )}
+              >
+                Este año
+              </button>
+            </>
+          )
+        })()}
 
         <div className="w-px h-4 bg-[var(--border)] flex-shrink-0" />
 
