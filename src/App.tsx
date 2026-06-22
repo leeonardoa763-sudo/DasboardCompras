@@ -10,7 +10,6 @@ import { FILTROS_VACÍOS } from './components/layout/types'
 import Layout from './components/layout/Layout'
 import PresentacionMode from './components/presentacion/PresentacionMode'
 import AuthGate from './components/auth/AuthGate'
-import ResumenView from './views/ResumenView'
 import TendenciasView from './views/TendenciasView'
 import PreciosView from './views/PreciosView'
 import ProveedoresView from './views/ProveedoresView'
@@ -22,6 +21,7 @@ function filtrarCompras(compras: Compra[], f: FiltrosActivos): Compra[] {
     if (f.empresas.length > 0 && !f.empresas.includes(c.empresa)) return false
     if (f.compradores.length > 0 && !f.compradores.includes(c.comprador)) return false
     if (f.centros.length > 0 && !f.centros.includes(c.centroCostos)) return false
+    if (f.categorias1.length > 0 && !f.categorias1.includes(c.categoria1)) return false
     if (f.tiposInsumo.length > 0 && !f.tiposInsumo.includes(c.tipoInsumo)) return false
     if (f.proveedores.length > 0 && !f.proveedores.includes(c.proveedor)) return false
     if (f.fechaDesde) {
@@ -40,7 +40,7 @@ export default function App() {
   const [result, setResult] = useState<ParseResult | null>(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeView, setActiveView] = useState<ViewId>('resumen')
+  const [activeView, setActiveView] = useState<ViewId>('precios')
   const [ultimaActualizacion, setUltimaActualizacion] = useState<Date | null>(null)
   const [filtros, setFiltros] = useState<FiltrosActivos>(FILTROS_VACÍOS)
   const [modoPresent, setModoPresent] = useState(false)
@@ -106,7 +106,6 @@ export default function App() {
 
   const renderView = () => {
     switch (activeView) {
-      case 'resumen':     return <ResumenView compras={comprasFiltradas} />
       case 'tendencias':  return <TendenciasView compras={comprasFiltradas} />
       case 'precios':     return <PreciosView compras={comprasFiltradas} />
       case 'proveedores': return <ProveedoresView compras={comprasFiltradas} />

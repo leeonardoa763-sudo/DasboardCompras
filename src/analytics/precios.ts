@@ -37,8 +37,10 @@ export interface ResumenInsumo {
   pendiente: number         // $/día de la regresión (0 si sin_datos)
   r2: number
   ultimaFecha: Date
+  ultimoPrecio: number
   gastoTotal: number
   cantidadTotal: number
+  nProveedores: number
 }
 
 /** Devuelve los puntos de precio ordenados por fecha para un id de insumo dado. */
@@ -146,6 +148,9 @@ export function resumenPreciosTodos(compras: Compra[]): ResumenInsumo[] {
       const gastoTotal = rows.reduce((s, c) => s + c.importe, 0)
       const cantidadTotal = rows.reduce((s, c) => s + c.cantidad, 0)
 
+      const ultimoPrecio = sorted[sorted.length - 1].precioUnitario
+      const nProveedores = new Set(rows.map((c) => c.idProveedor)).size
+
       return {
         insumoClave,
         descripcion: rows[0].descripcion,
@@ -160,8 +165,10 @@ export function resumenPreciosTodos(compras: Compra[]): ResumenInsumo[] {
         pendiente,
         r2: 0,
         ultimaFecha: sorted[sorted.length - 1].fecha,
+        ultimoPrecio,
         gastoTotal,
         cantidadTotal,
+        nProveedores,
       }
     })
     .sort((a, b) => b.gastoTotal - a.gastoTotal)

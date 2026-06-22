@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import type { ViewId } from '../layout/types'
 
 const VIEW_LABELS: Record<ViewId, string> = {
-  resumen:     'Resumen Ejecutivo',
   tendencias:  'Análisis de Tendencias',
   precios:     'Análisis de Precios',
   proveedores: 'Proveedores',
@@ -12,7 +11,7 @@ const VIEW_LABELS: Record<ViewId, string> = {
 }
 
 const VIEW_ORDER: ViewId[] = [
-  'resumen', 'tendencias', 'precios', 'proveedores', 'compradores', 'reportes',
+  'tendencias', 'precios', 'proveedores', 'compradores', 'reportes',
 ]
 
 interface Props {
