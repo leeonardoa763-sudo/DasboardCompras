@@ -27,25 +27,7 @@ export async function cargarDesdeArchivo(file: File): Promise<ParseResult> {
   return parsearBuffer(buffer)
 }
 
-/**
- * Carga el dataset de ejemplo desde /public/data/ejemplo.xlsx.
- * Usado como fuente inicial si no se configura Google Sheets.
- */
-export async function cargarEjemplo(): Promise<ParseResult> {
-  const response = await fetch('/data/ejemplo.xlsx')
-  if (!response.ok) {
-    return {
-      compras: [],
-      advertencias: [`No se pudo cargar ejemplo.xlsx: HTTP ${response.status}`],
-    }
-  }
-  const contentType = response.headers.get('content-type') ?? ''
-  if (contentType.includes('text/html')) {
-    return {
-      compras: [],
-      advertencias: ['El archivo ejemplo.xlsx no se encontró en /public/data/'],
-    }
-  }
-  const buffer = await response.arrayBuffer()
+/** Carga un .xlsx ya en memoria (p. ej. descifrado de datos.enc). */
+export async function cargarDesdeBuffer(buffer: ArrayBuffer): Promise<ParseResult> {
   return parsearBuffer(buffer)
 }

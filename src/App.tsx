@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { cargarEjemplo, cargarDesdeArchivo } from './data/loadExcel'
+import { cargarDesdeArchivo, cargarDesdeBuffer } from './data/loadExcel'
 import { cargarDesdeGoogleSheets } from './data/loadSheet'
 import type { ParseResult } from './data/schema'
 import type { Compra } from './data/schema'
 import type { Usuario } from './auth/auth'
-import { cargarSesion, guardarSesion, VISTAS_POR_ROLE } from './auth/auth'
+import { USUARIO_POR_ROLE, VISTAS_POR_ROLE } from './auth/auth'
+import { abrirBoveda, cargarBoveda } from './auth/vault'
 import type { ViewId, FiltrosActivos } from './components/layout/types'
 import { FILTROS_VACÍOS } from './components/layout/types'
 import Layout from './components/layout/Layout'
@@ -38,7 +39,7 @@ function filtrarCompras(compras: Compra[], f: FiltrosActivos): Compra[] {
 
 export default function App() {
   const [result, setResult] = useState<ParseResult | null>(null)
-  const [cargando, setCargando] = useState(true)
+  const [cargando, setCargando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [activeView, setActiveView] = useState<ViewId>('precios')
   const [ultimaActualizacion, setUltimaActualizacion] = useState<Date | null>(null)
@@ -57,20 +58,16 @@ export default function App() {
     }
   }, [usuario, vistasPermitidas, activeView])
 
-  useEffect(() => {
-    const sesion = cargarSesion()
-    if (sesion) {
-      setUsuario(sesion)
-    }
-
-    cargarEjemplo()
-      .then((r) => {
-        setResult(r)
-        setUltimaActualizacion(new Date())
-      })
-      .catch((e: unknown) => setError(String(e)))
-      .finally(() => setCargando(false))
-  }, [])
+  const handleLogin = async (clave: string): Promise<string | null> => {
+    const boveda = await cargarBoveda().catch(() => null)
+    if (!boveda) return 'No hay datos publicados. Puedes ver el demo sin datos.'
+    const abierta = await abrirBoveda(boveda, clave)
+    if (!abierta) return 'Clave incorrecta.'
+    setResult(await cargarDesdeBuffer(abierta.buffer))
+    setUltimaActualizacion(new Date())
+    setUsuario(USUARIO_POR_ROLE[abierta.role])
+    return null
+  }
 
   const handleCargarArchivo = (file: File) => {
     setCargando(true)
@@ -157,10 +154,8 @@ export default function App() {
   if (!usuario) {
     return (
       <AuthGate
-        onLogin={(u) => {
-          setUsuario(u)
-          guardarSesion(u)
-        }}
+        onSubmit={handleLogin}
+        onDemo={() => setUsuario(USUARIO_POR_ROLE.viewer)}
       />
     )
   }
@@ -192,7 +187,9 @@ export default function App() {
       onPresentar={() => setModoPresent(true)}
       usuario={usuario}
       onLogout={() => {
-        guardarSesion(null)
+        setResult(null)
+        setUltimaActualizacion(null)
+        setFiltros(FILTROS_VACÍOS)
         setUsuario(null)
       }}
       vistasPermitidas={vistasPermitidas}

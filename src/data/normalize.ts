@@ -3,6 +3,13 @@ import type { Compra, ParseResult } from './schema'
 
 type RawRow = Record<string, unknown>
 
+// Nombres reales de empresa nunca se muestran en la UI
+const ALIAS_EMPRESA: Record<string, string> = {
+  CAPAM: 'CP',
+  TRIACO: 'TR',
+  COEDESSA: 'CD',
+}
+
 // ── Helpers de conversión defensivos ────────────────────────────────
 
 function toStr(v: unknown, fallback = ''): string {
@@ -69,7 +76,8 @@ function normalizeRow(
   }
 
   // Verificar campos obligatorios mínimos
-  const empresa = toStr(mapped.empresa)
+  const empresaRaw = toStr(mapped.empresa)
+  const empresa = ALIAS_EMPRESA[empresaRaw.toUpperCase()] ?? empresaRaw
   if (!empresa) { warn('campo "Empresa" vacío — fila omitida'); return null }
 
   const fecha = toDate(mapped.fecha)

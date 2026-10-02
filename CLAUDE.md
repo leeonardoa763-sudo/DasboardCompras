@@ -55,8 +55,12 @@ Esto hace el deploy trivial y el acceso de los jefes literalmente un click.
 2. **Modo carga de archivo (respaldo):** botón / drag-and-drop para subir un `.xlsx`
    directamente en la interfaz. Útil para análisis ad-hoc sin tocar el Sheet.
 
-Siempre debe existir un **dataset de ejemplo** en `public/data/ejemplo.xlsx` para que la
-app nunca se vea vacía en el primer load.
+**Datos protegidos (cifrado):** el Excel real vive solo en `datos-privados/datos.xlsx`
+(ignorado por Git). `npm run cifrar` lo convierte en `public/data/datos.enc` (AES-GCM,
+PBKDF2) con una clave para `admin` y otra para `viewer`; la app descifra en el navegador
+al teclear la clave (el rol sale de qué clave abre). No hay contraseñas en el código.
+Sin clave solo hay un demo vacío. Nunca poner un `.xlsx` real en `public/`.
+Las empresas se muestran con siglas (CAPAM→CP, TRIACO→TR, COEDESSA→CD) vía `normalize.ts`.
 
 ---
 

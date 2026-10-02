@@ -4,9 +4,9 @@ node_modules
 # Build output
 dist
 
-# Excel files reales (solo se sube el ejemplo)
+# Excel reales: nunca al repo (solo se sube public/data/datos.enc, cifrado)
 *.xlsx
-!public/data/ejemplo.xlsx
+datos-privados/
 
 # Editor
 .vscode
