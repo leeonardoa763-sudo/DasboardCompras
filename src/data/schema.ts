@@ -72,6 +72,7 @@ export const HEADER_ALIASES: Record<string, string> = {
   'código comprador': 'Codigo Comprador',
   'codigo de ahorro': 'Codigo de ahorro',
   'código de ahorro': 'Codigo de ahorro',
+  'codigo_ahorro': 'Codigo de ahorro',
   'tipo de insumo': 'Categoria 2',
   'categoria 1':    'Categoria 1',
   'categoria 2':    'Categoria 2',
